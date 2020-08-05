@@ -1,0 +1,32 @@
+lint:
+  commands: &lint
+    lint-frozen-strings:
+      glob: "*.rb"
+      run: bundle exec rubocop {staged_files} --only Style/FrozenStringLiteralComment,Layout/EmptyLineAfterMagicComment --format quiet --auto-correct
+
+pre-commit:
+  parallel: true
+  commands:
+    <<: *lint
+    standardrb:
+      glob: "*.rb"
+      run: bundle exec standardrb {staged_files}
+    rubocop-rspec:
+      glob: "spec/*"
+      run: bundle exec rubocop {staged_files} --only RSpec --format quiet
+    rspec:
+      glob: "*_spec.rb"
+      run: bundle exec rspec {staged_files} --format failures
+
+post-checkout:
+  commands:
+    bundle-install:
+      run: bundle check || bundle install
+
+pre-push:
+  parallel: true
+  commands:
+    bundler-audit:
+      run: bundle audit --update --quiet
+    rspec:
+      run: bundle exec rspec --format failures
