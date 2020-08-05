@@ -1,19 +1,22 @@
 # frozen_string_literal: true
 
+require "jsonapi/query_builder/mixins/sort"
+
 module Jsonapi
   module QueryBuilder
     class BaseQuery
-      def initialize(collection, _params)
+      include Mixins::Sort
+
+      attr_reader :collection, :params
+
+      def initialize(collection, params)
         @collection = collection
+        @params = params
       end
 
       def results
-        collection
+        sort collection
       end
-
-      private
-
-      attr_reader :collection
     end
   end
 end

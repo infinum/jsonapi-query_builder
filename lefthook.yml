@@ -4,16 +4,20 @@ lint:
       glob: "*.rb"
       run: bundle exec rubocop {staged_files} --only Style/FrozenStringLiteralComment,Layout/EmptyLineAfterMagicComment --format quiet --auto-correct
 
+rubocop:
+  commands: &rubocop
+    rubocop-rspec:
+      glob: "spec/*"
+      run: bundle exec rubocop {staged_files} --only RSpec --format quiet
+
 pre-commit:
   parallel: true
   commands:
     <<: *lint
+    <<: *rubocop
     standardrb:
       glob: "*.rb"
       run: bundle exec standardrb {staged_files}
-    rubocop-rspec:
-      glob: "spec/*"
-      run: bundle exec rubocop {staged_files} --only RSpec --format quiet
     rspec:
       glob: "*_spec.rb"
       run: bundle exec rspec {staged_files} --format failures
