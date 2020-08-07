@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
+require "jsonapi/query_builder/mixins/include"
 require "jsonapi/query_builder/mixins/sort"
 
 module Jsonapi
   module QueryBuilder
     class BaseQuery
+      include Mixins::Include
       include Mixins::Sort
 
       attr_reader :collection, :params
@@ -15,7 +17,9 @@ module Jsonapi
       end
 
       def results
-        sort collection
+        collection
+          .tap(&method(:sort))
+          .tap(&method(:add_includes))
       end
     end
   end

@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     jsonapi-query_builder (0.1.0)
-      activerecord
+      activerecord (>= 5, <= 6.1)
 
 GEM
   remote: https://rubygems.org/
@@ -29,7 +29,7 @@ GEM
     parser (2.7.1.4)
       ast (~> 2.4.1)
     rainbow (3.0.0)
-    rake (12.3.3)
+    rake (13.0.1)
     regexp_parser (1.7.1)
     rexml (3.2.4)
     rspec (3.9.0)
@@ -79,9 +79,10 @@ DEPENDENCIES
   bundler (~> 2.0)
   jsonapi-query_builder!
   lefthook
-  rake (~> 12.0)
+  rake (~> 13.0)
   rspec (~> 3.0)
   rubocop-rspec
+  standard (~> 0.4.7)
   standardrb
 
 BUNDLED WITH
