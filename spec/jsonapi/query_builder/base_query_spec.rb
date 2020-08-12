@@ -14,6 +14,7 @@ RSpec.describe Jsonapi::QueryBuilder::BaseQuery do
   before do
     allow(query).to receive(:sort).and_return(collection)
     allow(query).to receive(:add_includes).and_return(collection)
+    allow(query).to receive(:paginate).and_return(collection)
   end
 
   it "returns the collection" do
@@ -30,5 +31,11 @@ RSpec.describe Jsonapi::QueryBuilder::BaseQuery do
     results
 
     expect(query).to have_received(:add_includes).with(collection)
+  end
+
+  it "paginates the collection" do
+    results
+
+    expect(query).to have_received(:paginate).with(collection)
   end
 end
