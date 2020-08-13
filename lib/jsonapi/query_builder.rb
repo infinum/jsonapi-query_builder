@@ -8,3 +8,4 @@ require "pagy"
 
 require "jsonapi/query_builder/version"
 require "jsonapi/query_builder/base_query"
+require "jsonapi/query_builder/base_filter"
