@@ -8,18 +8,18 @@ module Jsonapi
 
         attr_reader :pagination_details
 
-        def paginate(collection, params = send(:params))
-          @pagination_details, records = pagy collection, page_params: :number,
-                                                          items: params[:size],
-                                                          outset: params[:offset]
+        def paginate(collection, page_params = send(:page_params))
+          @pagination_details, records = pagy collection, page: page_params[:number],
+                                                          items: page_params[:size],
+                                                          outset: page_params[:offset]
 
           records
         end
 
         private
 
-        def params
-          @params[:page] || {}
+        def page_params
+          {number: 1, **@params.fetch(:page, {})}
         end
       end
     end
