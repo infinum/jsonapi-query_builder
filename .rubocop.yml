@@ -1,5 +1,8 @@
 require:
   - rubocop-rspec
 
+RSpec/NestedGroups:
+  Max: 4
+
 AllCops:
   NewCops: enable

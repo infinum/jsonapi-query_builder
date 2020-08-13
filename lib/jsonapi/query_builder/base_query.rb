@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "jsonapi/query_builder/mixins/filtering"
 require "jsonapi/query_builder/mixins/include"
 require "jsonapi/query_builder/mixins/paginate"
 require "jsonapi/query_builder/mixins/sort"
@@ -7,6 +8,7 @@ require "jsonapi/query_builder/mixins/sort"
 module Jsonapi
   module QueryBuilder
     class BaseQuery
+      include Mixins::Filtering
       include Mixins::Include
       include Mixins::Paginate
       include Mixins::Sort
@@ -20,9 +22,10 @@ module Jsonapi
 
       def results
         collection
-          .tap(&method(:sort))
-          .tap(&method(:add_includes))
-          .tap(&method(:paginate))
+          .yield_self(&method(:sort))
+          .yield_self(&method(:add_includes))
+          .yield_self(&method(:filter))
+          .yield_self(&method(:paginate))
       end
     end
   end

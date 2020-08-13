@@ -32,8 +32,9 @@ class UserQuery < Jsonapi::QueryBuilder::BaseQuery
   sorts_by :first_name, :last_name, :email
 
   ## filtering
-  filters_by :first_name, :last_name
-  filters_by :email, ->(query) { where('email ilike ?', "%#{query}%") }
+  filters_by :first_name
+  filters_by :last_name
+  filters_by :email, ->(collection, query) { collection.where('email ilike ?', "%#{query}%") }
   filters_by :type, TypeFilter
   filters_by :mrn, MrnInMemoryFilter
 end
@@ -88,22 +89,22 @@ filters_by :first_name
 
 #### Lambda as a filter
 ```ruby
-filters_by :email, ->(query) { where('email ilike ?', "%#{query}%") }
+filters_by :email, ->(collection, query) { collection.where('email ilike ?', "%#{query}%") }
 # => collection.where('email ilike ?', "%#{params.dig(:filter, :email)}%") if params.dig(:filter, :email).present?
 ```
 
 #### Filter classes
-But since we're devout followers of the SOLID principles, we can define a filter class that responds to `#results` method,
-which returns the filtered collection results. Under the hood the filter class is initialized with the current scope and
-the query parameter is passed to the call method. This is great if you're using query objects for ActiveRecord scopes,
-you can easily use them to filter as well.
+But since we're devout followers of the SOLID principles, we can define a filter class that responds to
+`#results` method, which returns the filtered collection results. Under the hood the filter class is initialized with
+the current scope and the query parameter is passed to the call method. This is great if you're using query objects for
+ActiveRecord scopes, you can easily use them to filter as well.
 ```ruby
 filters_by :type, TypeFilter
 ```
 The filter class could look something like
 ```ruby
 class TypeFilter < Jsonapi::QueryBuilder::BaseFilter
-  def results(query)
+  def results
     collection.where(type: query.split(','))
   end
 end
@@ -112,7 +113,7 @@ Sometimes you need to perform in-memory filtering, for example when database att
 those filters should be applied last, the order of definition in the query object matters.
 ```ruby
 class MrnFilter < Jsonapi::QueryBuilder::BaseFilter
-  def results(query)
+  def results
     collection.select { |record| /#{query}/.match?(record.mrn) }
   end
 end
@@ -129,11 +130,6 @@ filters_by :first_name, query_parameter: 'name'
 filters_by :first_name, allow_nil: true
 # => collection.where(first_name: params.dig(:filter, :first_name)) if params[:filter]&.key?(:first_name)
 ```
-`required` option raises an error if the filter parameter is not explicitly defined
-```ruby
-filters_by :first_name, required: true
-# => collection.where(first_name: params.fetch(:filter).fetch(:first_name))
-```
 The conditional when the filter is applied can also be defined explicitly. Note that these options override the
 `allow_nil` option, as the condition if defined explicitly and you should handle `nil` explicitly as well.
 ```ruby
@@ -141,6 +137,12 @@ filters_by :first_name, if: ->(query) { query.length >= 2 }
 # => collection.where(first_name: params.dig(:filter, :first_name)) if params.dig(:filter, :first_name) >= 2
 filters_by :first_name, unless: ->(query) { query.length < 2 }
 # => collection.where(first_name: params.dig(:filter, :first_name)) unless params.dig(:filter, :first_name) < 2
+```
+When you're using a filter class you can pass a symbol to the `:if` and `:unless` options which invokes the method on
+the filter class.
+```ruby
+filters_by :type, TypeFilter, if: :correct_type?
+# => type_filter = TypeFilter.new(collection, query); type_filter.results if type_filter.correct_type?
 ```
 
 ## Development
