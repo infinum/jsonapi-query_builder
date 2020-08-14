@@ -8,15 +8,15 @@ module Jsonapi
 
         UnpermittedSortParameters = Class.new ArgumentError
 
-        included do
-          @_unique_sort_attributes = [id: :asc]
-        end
-
         class_methods do
           attr_reader :_unique_sort_attributes, :_default_sort, :_sort_attributes
 
           def unique_sort_attributes(*attributes)
             @_unique_sort_attributes = attributes
+          end
+
+          def _unique_sort_attributes
+            @_unique_sort_attributes || [id: :asc]
           end
 
           alias_method :unique_sort_attribute, :unique_sort_attributes

@@ -17,7 +17,7 @@ module Jsonapi
 
       def initialize(collection, params)
         @collection = collection
-        @params = params
+        @params = params.symbolize_keys
       end
 
       def results

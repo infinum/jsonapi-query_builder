@@ -30,7 +30,7 @@ module Jsonapi
         private
 
         def filter_params
-          params[:filter] || {}
+          params[:filter].symbolize_keys || {}
         end
 
         def serialize_filter(supported_filter, collection:, params:)

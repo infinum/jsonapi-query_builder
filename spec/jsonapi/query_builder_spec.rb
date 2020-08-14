@@ -1,7 +1,97 @@
 # frozen_string_literal: true
 
+require "active_record"
+
 RSpec.describe Jsonapi::QueryBuilder do
   it "has a version number" do
     expect(Jsonapi::QueryBuilder::VERSION).not_to be nil
+  end
+
+  context "with controller usage" do
+    subject(:query) { Query.new(collection, params) }
+
+    let(:query_class) do
+      Class.new(Jsonapi::QueryBuilder::BaseQuery) {
+        default_sort :last_name
+        sorts_by :first_name, :last_name
+
+        filters_by :first_name
+        filters_by :email, ->(collection, query) { collection.where("email ilike ?", "%#{query}%") }
+        filters_by :type, TypeFilter, if: :correct_type?
+      }
+    end
+    let(:type_filter_class) do
+      Class.new(Jsonapi::QueryBuilder::BaseFilter) {
+        def query
+          super.camelize
+        end
+
+        def results
+          collection.where(type: query)
+        end
+
+        def correct_type?
+          %w[User Admin].include?(query)
+        end
+      }
+    end
+    let(:collection) { instance_double "collection" }
+
+    let(:params) do
+      {
+        "sort" => "first_name,-last_name",
+        "include" => "books",
+        "filter" => {"email" => "j", "type" => "user"},
+        "page" => {"number" => 1, "size" => 20, "offset" => 0}
+      }
+    end
+
+    before do
+      stub_const "TypeFilter", type_filter_class
+      stub_const "Query", query_class
+
+      allow(collection).to receive(:reorder).and_return(collection)
+      allow(collection).to receive(:order).and_return(collection)
+      allow(collection).to receive(:includes).and_return(collection)
+      allow(collection).to receive(:where).and_return(collection)
+      allow(collection).to receive(:count).and_return(2)
+      allow(collection).to receive(:offset).and_return(collection)
+      allow(collection).to receive(:limit).and_return(collection)
+    end
+
+    it { is_expected.to have_attributes(results: collection, pagination_details: an_instance_of(Pagy)) }
+
+    it "reorders the collection" do
+      query.results
+
+      expect(collection).to have_received(:reorder).with(first_name: :asc, last_name: :desc)
+    end
+
+    it "adds unique sort attribute" do
+      query.results
+
+      expect(collection).to have_received(:order).with(id: :asc)
+    end
+
+    it "includes included relationships" do
+      query.results
+
+      expect(collection).to have_received(:includes).with(%i[books])
+    end
+
+    it "filters the collection by passed filter params", :aggregate_failures do
+      query.results
+
+      expect(collection).to have_received(:where).with("email ilike ?", "%j%")
+      expect(collection).to have_received(:where).with(type: "User")
+    end
+
+    it "paginates the collection", :aggregate_failures do
+      query.results
+
+      expect(collection).to have_received(:count)
+      expect(collection).to have_received(:offset).with(0)
+      expect(collection).to have_received(:limit).with(2)
+    end
   end
 end
