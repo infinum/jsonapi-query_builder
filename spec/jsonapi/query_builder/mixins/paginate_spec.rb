@@ -24,7 +24,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Paginate do
     let(:collection) { instance_double "collection" }
     let(:pagination_details) { instance_double "pagination-details" }
     let(:paged_collection) { instance_double "paged-collection" }
-    let(:params) { {page: {number: 2, size: 20, outset: 0}} }
+    let(:params) { {page: {number: 2, size: 20, offset: 0}} }
 
     before do
       allow(paged_query).to receive(:pagy).and_return([pagination_details, paged_collection])
@@ -38,6 +38,12 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Paginate do
       paginate
 
       expect(paged_query.pagination_details).to eql(pagination_details)
+    end
+
+    it "passes the params to pagy" do
+      paginate
+
+      expect(paged_query).to have_received(:pagy).with(anything, page: 2, items: 20, outset: 0)
     end
 
     it "defaults to page number 1" do
