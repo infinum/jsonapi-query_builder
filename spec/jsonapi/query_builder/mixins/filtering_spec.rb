@@ -186,5 +186,23 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Filtering do
         end
       end
     end
+
+    context "when no filters are set" do
+      let(:filterable_query_class) do
+        Class.new {
+          include Jsonapi::QueryBuilder::Mixins::Filtering
+
+          attr_reader :params
+
+          def initialize(params)
+            @params = params
+          end
+        }
+      end
+
+      it "returns the collection" do
+        expect(filter).to eql collection
+      end
+    end
   end
 end

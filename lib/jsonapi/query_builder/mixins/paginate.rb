@@ -19,7 +19,7 @@ module Jsonapi
         private
 
         def page_params
-          {number: 1, **@params.fetch(:page, {})}
+          {number: 1, **params.fetch(:page, {})}
         end
       end
     end

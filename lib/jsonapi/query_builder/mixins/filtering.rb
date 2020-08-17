@@ -7,11 +7,13 @@ module Jsonapi
         extend ActiveSupport::Concern
 
         class_methods do
-          attr_reader :supported_filters
+          def supported_filters
+            @supported_filters || {}
+          end
 
           def filters_by(attribute, filter = nil, **options)
             filter ||= ->(collection, query) { collection.where(attribute => query) }
-            @supported_filters = {**(@supported_filters || {}), attribute => [filter, options]}
+            @supported_filters = {**supported_filters, attribute => [filter, options]}
           end
         end
 
@@ -30,7 +32,7 @@ module Jsonapi
         private
 
         def filter_params
-          params[:filter].symbolize_keys || {}
+          params[:filter] || {}
         end
 
         def serialize_filter(supported_filter, collection:, params:)
