@@ -10,7 +10,7 @@ RSpec.describe Jsonapi::QueryBuilder do
   context "with controller usage" do
     subject(:query) { Query.new(collection, params) }
 
-    let(:query_class) do
+    let(:query_class) {
       Class.new(Jsonapi::QueryBuilder::BaseQuery) {
         default_sort :last_name
         sorts_by :first_name, :last_name
@@ -19,8 +19,8 @@ RSpec.describe Jsonapi::QueryBuilder do
         filters_by :email, ->(collection, query) { collection.where("email ilike ?", "%#{query}%") }
         filters_by :type, TypeFilter, if: :correct_type?
       }
-    end
-    let(:type_filter_class) do
+    }
+    let(:type_filter_class) {
       Class.new(Jsonapi::QueryBuilder::BaseFilter) {
         def query
           super.camelize
@@ -34,17 +34,17 @@ RSpec.describe Jsonapi::QueryBuilder do
           %w[User Admin].include?(query)
         end
       }
-    end
+    }
     let(:collection) { instance_double "collection" }
 
-    let(:params) do
+    let(:params) {
       {
         "sort" => "first_name,-last_name",
-        "include" => "books",
+        "include" => "books.tags",
         "filter" => {"email" => "j", "type" => "user"},
         "page" => {"number" => 1, "size" => 20, "offset" => 0}
       }
-    end
+    }
 
     before do
       stub_const "TypeFilter", type_filter_class
@@ -61,37 +61,67 @@ RSpec.describe Jsonapi::QueryBuilder do
 
     it { is_expected.to have_attributes(results: collection, pagination_details: an_instance_of(Pagy)) }
 
-    it "reorders the collection" do
-      query.results
+    describe "#results" do
+      subject(:results) { query.results }
 
-      expect(collection).to have_received(:reorder).with(first_name: :asc, last_name: :desc)
+      it { is_expected.to eql collection }
+
+      it "reorders the collection" do
+        results
+
+        expect(collection).to have_received(:reorder).with(first_name: :asc, last_name: :desc)
+      end
+
+      it "adds unique sort attribute" do
+        results
+
+        expect(collection).to have_received(:order).with(id: :asc)
+      end
+
+      it "includes included relationships" do
+        results
+
+        expect(collection).to have_received(:includes).with([{books: :tags}])
+      end
+
+      it "filters the collection by passed filter params", :aggregate_failures do
+        results
+
+        expect(collection).to have_received(:where).with("email ilike ?", "%j%")
+        expect(collection).to have_received(:where).with(type: "User")
+      end
+
+      it "paginates the collection", :aggregate_failures do
+        results
+
+        expect(collection).to have_received(:count)
+        expect(collection).to have_received(:offset).with(0)
+        expect(collection).to have_received(:limit).with(2)
+      end
     end
 
-    it "adds unique sort attribute" do
-      query.results
+    describe "#find" do
+      subject(:find) { query.find(1) }
 
-      expect(collection).to have_received(:order).with(id: :asc)
-    end
+      let(:record) { instance_double "record" }
 
-    it "includes included relationships" do
-      query.results
+      before do
+        allow(collection).to receive(:find_by).and_return(record)
+      end
 
-      expect(collection).to have_received(:includes).with(%i[books])
-    end
+      it { is_expected.to eql record }
 
-    it "filters the collection by passed filter params", :aggregate_failures do
-      query.results
+      it "includes included relationships" do
+        find
 
-      expect(collection).to have_received(:where).with("email ilike ?", "%j%")
-      expect(collection).to have_received(:where).with(type: "User")
-    end
+        expect(collection).to have_received(:includes).with([{books: :tags}])
+      end
 
-    it "paginates the collection", :aggregate_failures do
-      query.results
+      it "finds the record" do
+        find
 
-      expect(collection).to have_received(:count)
-      expect(collection).to have_received(:offset).with(0)
-      expect(collection).to have_received(:limit).with(2)
+        expect(collection).to have_received(:find_by).with(id: 1)
+      end
     end
   end
 end
