@@ -106,7 +106,7 @@ RSpec.describe Jsonapi::QueryBuilder do
       let(:record) { instance_double "record" }
 
       before do
-        allow(collection).to receive(:find_by).and_return(record)
+        allow(collection).to receive(:find_by!).and_return(record)
       end
 
       it { is_expected.to eql record }
@@ -120,7 +120,7 @@ RSpec.describe Jsonapi::QueryBuilder do
       it "finds the record" do
         find
 
-        expect(collection).to have_received(:find_by).with(id: 1)
+        expect(collection).to have_received(:find_by!).with(id: 1)
       end
     end
   end

@@ -63,50 +63,50 @@ RSpec.describe Jsonapi::QueryBuilder::BaseQuery do
     let(:params) { {id: 2, include: "books.tags"} }
 
     before do
-      allow(query).to receive(:find_by)
+      allow(query).to receive(:find_by!)
     end
 
     it "finds by id" do
       find
 
-      expect(query).to have_received(:find_by).with(id: 1)
+      expect(query).to have_received(:find_by!).with(id: 1)
     end
 
     it "aliases record to find with default parameters" do
       query.record
 
-      expect(query).to have_received(:find_by).with(id: 2)
+      expect(query).to have_received(:find_by!).with(id: 2)
     end
   end
 
-  describe "#find_by" do
-    subject(:find_by) { query.find_by(id: 1) }
+  describe "#find_by!" do
+    subject(:find_by!) { query.find_by!(id: 1) }
 
     let(:params) { {include: "books.tags"} }
     let(:record) { instance_double "record" }
 
     before do
-      allow(collection).to receive(:find_by).and_return(record)
+      allow(collection).to receive(:find_by!).and_return(record)
     end
 
     it { is_expected.to eql record }
 
     it "adds includes to the collection" do
-      find_by
+      find_by!
 
       expect(query).to have_received(:add_includes).with(collection)
     end
 
     it "finds a record" do
-      find_by
+      find_by!
 
-      expect(collection).to have_received(:find_by).with(id: 1)
+      expect(collection).to have_received(:find_by!).with(id: 1)
     end
 
     it "finds by multiple kwargs" do
-      query.find_by(id: 1, first_name: "John")
+      query.find_by!(id: 1, first_name: "John")
 
-      expect(collection).to have_received(:find_by).with(id: 1, first_name: "John")
+      expect(collection).to have_received(:find_by!).with(id: 1, first_name: "John")
     end
   end
 end

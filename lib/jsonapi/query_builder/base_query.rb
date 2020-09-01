@@ -29,15 +29,15 @@ module Jsonapi
       end
 
       def find(id)
-        find_by id: id
+        find_by! id: id
       end
 
       def record
-        find_by id: params[:id]
+        find_by! id: params[:id]
       end
 
-      def find_by(**kwargs)
-        add_includes(collection).find_by(kwargs)
+      def find_by!(**kwargs)
+        add_includes(collection).find_by!(kwargs)
       end
     end
   end
