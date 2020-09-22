@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
-  subject(:test_query_class) do
+  subject(:test_query_class) {
     Class.new {
       include Jsonapi::QueryBuilder::Mixins::Sort
     }
-  end
+  }
 
   before do
     stub_const "TestQuery", test_query_class
@@ -57,13 +57,20 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
 
         expect(TestQuery._sort_attributes).to include(:first_name, :last_name)
       end
+
+      it "registers a nested sort attribute as last item" do
+        TestQuery.sorts_by user: %i[first_name last_name]
+        TestQuery.sorts_by :email
+
+        expect(TestQuery._sort_attributes[-1]).to eql(user: %i[first_name last_name])
+      end
     end
   end
 
   describe "#sort" do
-    subject(:sort) { TestQuery.new(sort_params).sort(collection) }
+    subject(:sort) { TestQuery.new(collection, sort_params).sort(collection) }
 
-    let(:test_query_class) do
+    let(:test_query_class) {
       Class.new {
         include Jsonapi::QueryBuilder::Mixins::Sort
 
@@ -72,21 +79,27 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
         unique_sort_attribute id: :asc
         sorts_by :first_name, :last_name
 
-        def initialize(params)
+        def initialize(collection, params)
+          @collection = collection
           @params = params
         end
       }
-    end
-    let(:collection) { instance_double "collection" }
+    }
+    let(:collection) { instance_double "collection", reorder: reordered_collection }
+    let(:reordered_collection) { instance_double "reordered_collection", order: ordered_collection }
+    let(:ordered_collection) { instance_double "ordered_collection" }
+
     let(:sort_params) { {} }
 
     before do
-      allow(collection).to receive(:reorder).and_return(collection)
-      allow(collection).to receive(:order).and_return(collection)
+      allow(Arel).to receive(:sql).with("first_name")
+        .and_return(instance_double(Arel::Nodes::SqlLiteral, asc: "first_name_asc", desc: "first_name_desc"))
+      allow(Arel).to receive(:sql).with("last_name")
+        .and_return(instance_double(Arel::Nodes::SqlLiteral, asc: "last_name_asc", desc: "last_name_desc"))
     end
 
     it "returns the sorted collection" do
-      expect(sort).to eql(collection)
+      expect(sort).to eql(ordered_collection)
     end
 
     context "when sort params are empty and a default sort is not set" do
@@ -99,7 +112,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
       it "fallbacks to the unique sort attributes" do
         sort
 
-        expect(collection).to have_received(:order).with(id: :asc)
+        expect(reordered_collection).to have_received(:order).with(id: :asc)
       end
     end
 
@@ -117,51 +130,96 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
       it "ensures a unique sort attribute" do
         sort
 
-        expect(collection).to have_received(:order).with(id: :asc)
+        expect(reordered_collection).to have_received(:order).with(id: :asc)
       end
     end
 
     context "when sort params are present and permitted" do
       let(:sort_params) { {sort: "first_name,-last_name"} }
 
-      it "splits the params to a hash" do
-        sort
-
-        expect(collection).to have_received(:reorder).with(first_name: anything, last_name: anything)
-      end
-
       it "sets asc order direction for params not starting with -" do
         sort
 
-        expect(collection).to have_received(:reorder).with(hash_including(first_name: :asc))
+        expect(collection).to have_received(:reorder).with(include("first_name_asc"))
       end
 
       it "sets desc order direction for params starting with -" do
         sort
 
-        expect(collection).to have_received(:reorder).with(hash_including(last_name: :desc))
+        expect(collection).to have_received(:reorder).with(include("last_name_desc"))
       end
 
       it "strips params" do
-        TestQuery.new(sort: " first_name ,  -last_name ").sort(collection)
+        TestQuery.new(collection, sort: " -first_name ,  last_name ").sort(collection)
 
-        expect(collection).to have_received(:reorder).with(first_name: anything, last_name: anything)
+        expect(collection).to have_received(:reorder).with(%w[first_name_desc last_name_asc])
+      end
+    end
+
+    context "when sort params are nested attributes" do
+      let(:joined_collection) { instance_double "joined_collection", reorder: reordered_collection }
+      let(:collection_class) { Class.new }
+      let(:user_arel_table) { instance_double "arel_table" }
+
+      let(:sort_params) { {sort: "user.last_name,-user.first_name"} }
+
+      before do
+        stub_const "User", collection_class
+
+        allow(collection).to receive(:left_joins).and_return(joined_collection)
+        allow(collection).to receive(:model_name).and_return(instance_double("model_name", name: "User"))
+        allow(collection_class).to receive(:arel_table).and_return(user_arel_table)
+        allow(user_arel_table).to receive("[]").with("first_name").and_return(
+          instance_double("user_last_name_arel_column", asc: "first_name_asc", desc: "first_name_desc")
+        )
+        allow(user_arel_table).to receive("[]").with("last_name").and_return(
+          instance_double("user_last_name_arel_column", asc: "last_name_asc", desc: "last_name_desc")
+        )
+
+        TestQuery.sorts_by user: %i[first_name last_name]
+      end
+
+      it "left joins the nested table" do
+        sort
+
+        expect(collection).to have_received(:left_joins).with(:user)
+      end
+
+      it "splits the params to a hash" do
+        sort
+
+        expect(joined_collection).to have_received(:reorder).with(%w[last_name_asc first_name_desc])
       end
     end
 
     context "when one or more of sort params is not permitted" do
-      let(:sort_params) { {sort: "first_name,email,birth_date"} }
+      let(:sort_params) { {sort: "first_name,email,birth_date,user.email,-user.first_name"} }
 
-      it "raises an unpermitted sort parameters error" do
-        expect { sort }.to raise_error(
-          Jsonapi::QueryBuilder::Mixins::Sort::UnpermittedSortParameters,
-          "email and birth_date are not permitted sort attributes"
-        )
+      context "when query does not support nested parameters" do
+        it "raises an unpermitted sort parameters error" do
+          expect { sort }.to raise_error(
+            Jsonapi::QueryBuilder::Mixins::Sort::UnpermittedSortParameters,
+            "email, birth_date, user.email, and user.first_name are not permitted sort attributes"
+          )
+        end
+      end
+
+      context "when query supports nested parameters" do
+        before do
+          TestQuery.sorts_by user: %i[first_name]
+        end
+
+        it "raises an unpermitted sort parameters error" do
+          expect { sort }.to raise_error(
+            Jsonapi::QueryBuilder::Mixins::Sort::UnpermittedSortParameters,
+            "email, birth_date, and user.email are not permitted sort attributes"
+          )
+        end
       end
     end
 
     context "when sort params are passed explicitly to #sort" do
-      subject(:sort) { TestQuery.new(params).sort(collection, sort_params) }
+      subject(:sort) { TestQuery.new(collection, params).sort(collection, sort_params) }
 
       let(:params) { {sort: "email"} }
       let(:sort_params) { "first_name,-last_name" }
@@ -169,7 +227,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
       it "overrides with the passed sort string" do
         sort
 
-        expect(collection).to have_received(:reorder).with(first_name: :asc, last_name: :desc)
+        expect(collection).to have_received(:reorder).with(%w[first_name_asc last_name_desc])
       end
     end
   end

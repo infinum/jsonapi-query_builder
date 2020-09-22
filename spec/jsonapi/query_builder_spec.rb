@@ -35,6 +35,7 @@ RSpec.describe Jsonapi::QueryBuilder do
         end
       }
     }
+
     let(:collection) { instance_double "collection" }
 
     let(:params) {
@@ -66,22 +67,22 @@ RSpec.describe Jsonapi::QueryBuilder do
 
       it { is_expected.to eql collection }
 
+      it "includes included relationships" do
+        results
+
+        expect(collection).to have_received(:includes).with([{books: :tags}])
+      end
+
       it "reorders the collection" do
         results
 
-        expect(collection).to have_received(:reorder).with(first_name: :asc, last_name: :desc)
+        expect(collection).to have_received(:reorder).with([Arel.sql("first_name").asc, Arel.sql("last_name").desc])
       end
 
       it "adds unique sort attribute" do
         results
 
         expect(collection).to have_received(:order).with(id: :asc)
-      end
-
-      it "includes included relationships" do
-        results
-
-        expect(collection).to have_received(:includes).with([{books: :tags}])
       end
 
       it "filters the collection by passed filter params", :aggregate_failures do

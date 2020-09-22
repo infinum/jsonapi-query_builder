@@ -13,7 +13,7 @@ module Jsonapi
       include Mixins::Paginate
       include Mixins::Sort
 
-      attr_reader :collection, :params
+      attr_accessor :collection, :params
 
       def initialize(collection, params)
         @collection = collection
@@ -22,8 +22,8 @@ module Jsonapi
 
       def results
         collection
-          .yield_self(&method(:sort))
           .yield_self(&method(:add_includes))
+          .yield_self(&method(:sort))
           .yield_self(&method(:filter))
           .yield_self(&method(:paginate))
       end
