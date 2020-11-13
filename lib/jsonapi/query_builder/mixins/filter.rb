@@ -3,7 +3,7 @@
 module Jsonapi
   module QueryBuilder
     module Mixins
-      module Filtering
+      module Filter
         extend ActiveSupport::Concern
 
         class_methods do
