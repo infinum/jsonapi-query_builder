@@ -29,7 +29,9 @@ Or install it yourself as:
 class UserQuery < Jsonapi::QueryBuilder::BaseQuery
   ## sorting
   default_sort created_at: :desc
-  sorts_by :first_name, :last_name, :email
+  sorts_by :last_name
+  sorts_by :first_name, ->(collection, direction) { collection.order(name: direction) }
+  sorts_by :email, EmailSort
 
   ## filtering
   filters_by :first_name
@@ -71,13 +73,25 @@ are passed directly to the underlying active record relation, so the usual order
 ```ruby
 default_sort created_at: :desc
 ```
-#### Enabling sorting for attributes
+#### Enabling simple sorting for attributes
 `sorts_by` denotes which attributes can be used for sorting. Sorting parameters are usually parsed from the
 `json:api` sort query parameter in order they are given. So `sort=-first_name,email` would translate to 
-`{ first_name: :desc, email: :asc }`
+`{ first_name: :desc, email: :asc }` 
 ```ruby
-sorts_by :first_name, :email
+sorts_by :first_name
+sorts_by :email
 ```
+#### Sorting with lambdas
+`sorts_by` also supports passing a lambda to implement a custom order or reorder function. The parameters passed to the 
+lamdba are collection and the direction of the order, which is either `:desc` or `:asc`.
+```ruby
+sorts_by :first_name, ->(collection, direction) { collection.order(name: direction) }
+```
+
+#### Sorting with sort classes
+But since we're devout followers of the SOLID principles, we can define a sort class that responds to
+`#results` method, which returns the sorted collection. Under the hood the sort class is initialized with
+the current scope and the direction parameter.
 
 ### Filtering
 
@@ -94,10 +108,11 @@ filters_by :email, ->(collection, query) { collection.where('email ilike ?', "%#
 ```
 
 #### Filter classes
-But since we're devout followers of the SOLID principles, we can define a filter class that responds to
-`#results` method, which returns the filtered collection results. Under the hood the filter class is initialized with
-the current scope and the query parameter is passed to the call method. This is great if you're using query objects for
-ActiveRecord scopes, you can easily use them to filter as well.
+We can define a filter class that responds to `#results` method, which returns the filtered collection results. Under
+the hood the filter class is initialized with the current scope and the query parameter. However, if the object responds
+to a `call` method it sends the current scope and the query parameter to that instead. This is great if you're using
+query objects for ActiveRecord scopes, you can easily use them to filter with as well.
+
 ```ruby
 filters_by :type, TypeFilter
 ```

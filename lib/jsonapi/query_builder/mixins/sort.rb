@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "jsonapi/query_builder/mixins/sort/param"
+
 module Jsonapi
   module QueryBuilder
     module Mixins
@@ -15,28 +17,33 @@ module Jsonapi
             @_unique_sort_attributes || [id: :asc]
           end
 
-          def _sort_attributes
-            @_sort_attributes || []
+          def supported_sorts
+            @supported_sorts || {}
           end
 
           def unique_sort_attributes(*attributes)
             @_unique_sort_attributes = attributes
           end
+
           alias_method :unique_sort_attribute, :unique_sort_attributes
 
           def default_sort(options)
             @_default_sort = options
           end
 
-          def sorts_by(*attributes)
-            @_sort_attributes = _sort_attributes + attributes
+          def sorts_by(attribute, sort = nil)
+            sort ||= ->(collection, direction) { collection.order(attribute => direction) }
+            @supported_sorts = {**supported_sorts, attribute => sort}
           end
         end
 
         def sort(collection, sort_params = send(:sort_params))
+          sort_params = Param.deserialize_params(sort_params)
+          ensure_permitted_sort_params!(sort_params) if sort_params
+
           collection
-            .reorder(sort_params.nil? ? self.class._default_sort : formatted_sort_params(sort_params))
-            .tap(&method(:add_unique_order_attributes))
+            .yield_self { |c| add_order_attributes(c, sort_params) }
+            .yield_self(&method(:add_unique_order_attributes))
         end
 
         private
@@ -45,27 +52,34 @@ module Jsonapi
           params[:sort]
         end
 
-        def add_unique_order_attributes(collection)
-          collection.order(*self.class._unique_sort_attributes)
-        end
-
-        def formatted_sort_params(sort_params)
-          sort_params
-            .split(",")
-            .map(&:strip)
-            .to_h { |attribute| attribute.start_with?("-") ? [attribute[1..-1], :desc] : [attribute, :asc] }
-            .symbolize_keys
-            .tap(&method(:ensure_permitted_sort_params!))
-        end
-
         def ensure_permitted_sort_params!(sort_params)
-          return if (unpermitted_parameters = sort_params.keys - self.class._sort_attributes.map(&:to_sym)).size.zero?
+          unpermitted_parameters = sort_params.map(&:attribute).map(&:to_sym) - self.class.supported_sorts.keys
+          return if unpermitted_parameters.size.zero?
 
           raise UnpermittedSortParameters, [
             unpermitted_parameters.to_sentence,
             unpermitted_parameters.count == 1 ? "is not a" : "are not",
             "permitted sort attribute".pluralize(unpermitted_parameters.count)
           ].join(" ")
+        end
+
+        def add_order_attributes(collection, sort_params)
+          return collection if self.class._default_sort.nil? && sort_params.blank?
+          return collection.order(self.class._default_sort) if sort_params.blank?
+
+          sort_params.reduce(collection) do |sorted_collection, sort_param|
+            sort = self.class.supported_sorts.fetch(sort_param.attribute.to_sym)
+
+            if sort.respond_to?(:call)
+              sort.call(sorted_collection, sort_param.direction)
+            else
+              sort.new(sorted_collection, sort_param.direction).results
+            end
+          end
+        end
+
+        def add_unique_order_attributes(collection)
+          collection.order(*self.class._unique_sort_attributes)
         end
       end
     end

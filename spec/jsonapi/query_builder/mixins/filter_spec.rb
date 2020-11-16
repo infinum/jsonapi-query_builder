@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-RSpec.describe Jsonapi::QueryBuilder::Mixins::Filtering do
+RSpec.describe Jsonapi::QueryBuilder::Mixins::Filter do
   describe "DSL" do
     subject(:filterable_query_class) do
       Class.new {
-        include Jsonapi::QueryBuilder::Mixins::Filtering
+        include Jsonapi::QueryBuilder::Mixins::Filter
       }
     end
 
@@ -54,7 +54,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Filtering do
 
     let(:filterable_query_class) do
       Class.new {
-        include Jsonapi::QueryBuilder::Mixins::Filtering
+        include Jsonapi::QueryBuilder::Mixins::Filter
 
         attr_reader :params
 
@@ -79,9 +79,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Filtering do
       allow(collection).to receive(:where).and_return(collection)
     end
 
-    it "returns the filtered collection" do
-      expect(filter).to eql collection
-    end
+    it { is_expected.to eql collection }
 
     it "filters by present simple filter" do
       filter
@@ -190,7 +188,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Filtering do
     context "when no filters are set" do
       let(:filterable_query_class) do
         Class.new {
-          include Jsonapi::QueryBuilder::Mixins::Filtering
+          include Jsonapi::QueryBuilder::Mixins::Filter
 
           attr_reader :params
 

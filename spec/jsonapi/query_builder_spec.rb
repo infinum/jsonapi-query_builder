@@ -13,7 +13,8 @@ RSpec.describe Jsonapi::QueryBuilder do
     let(:query_class) {
       Class.new(Jsonapi::QueryBuilder::BaseQuery) {
         default_sort :last_name
-        sorts_by :first_name, :last_name
+        sorts_by :first_name
+        sorts_by :last_name
 
         filters_by :first_name
         filters_by :email, ->(collection, query) { collection.where("email ilike ?", "%#{query}%") }
@@ -35,6 +36,7 @@ RSpec.describe Jsonapi::QueryBuilder do
         end
       }
     }
+
     let(:collection) { instance_double "collection" }
 
     let(:params) {
@@ -50,7 +52,6 @@ RSpec.describe Jsonapi::QueryBuilder do
       stub_const "TypeFilter", type_filter_class
       stub_const "Query", query_class
 
-      allow(collection).to receive(:reorder).and_return(collection)
       allow(collection).to receive(:order).and_return(collection)
       allow(collection).to receive(:includes).and_return(collection)
       allow(collection).to receive(:where).and_return(collection)
@@ -66,22 +67,23 @@ RSpec.describe Jsonapi::QueryBuilder do
 
       it { is_expected.to eql collection }
 
-      it "reorders the collection" do
+      it "includes included relationships" do
         results
 
-        expect(collection).to have_received(:reorder).with(first_name: :asc, last_name: :desc)
+        expect(collection).to have_received(:includes).with([{books: :tags}])
+      end
+
+      it "orders the collection", :aggregate_failures do
+        results
+
+        expect(collection).to have_received(:order).with(first_name: :asc)
+        expect(collection).to have_received(:order).with(last_name: :desc)
       end
 
       it "adds unique sort attribute" do
         results
 
         expect(collection).to have_received(:order).with(id: :asc)
-      end
-
-      it "includes included relationships" do
-        results
-
-        expect(collection).to have_received(:includes).with([{books: :tags}])
       end
 
       it "filters the collection by passed filter params", :aggregate_failures do
