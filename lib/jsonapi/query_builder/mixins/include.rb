@@ -1,11 +1,17 @@
 # frozen_string_literal: true
 
+require "jsonapi/query_builder/mixins/include/param"
+
 module Jsonapi
   module QueryBuilder
     module Mixins
       module Include
         def add_includes(collection, include_params = send(:include_params))
-          collection.includes(formatted_include_params(include_params))
+          return collection unless include_params
+
+          # include_params = Param.deserialize_params(include_params)
+
+          collection.includes(*formatted_include_params(include_params))
         end
 
         private

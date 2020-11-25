@@ -21,7 +21,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Include do
     subject(:add_includes) { AuthorQuery.new(include_params).add_includes(collection) }
 
     let(:collection) { instance_double "collection" }
-    let(:include_params) { {} }
+    let(:include_params) { {include: "books,address"} }
 
     before do
       allow(collection).to receive(:includes).and_return(collection)
@@ -31,23 +31,59 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Include do
       expect(add_includes).to eql(collection)
     end
 
+    it "includes parsed include params" do
+      add_includes
+
+      expect(collection).to have_received(:includes).with(:books, :address)
+    end
+
     context "when include params are empty" do
       let(:include_params) { {} }
 
-      it "includes an empty array" do
+      it "does not include anything when include params are empty" do
         add_includes
 
-        expect(collection).to have_received(:includes).with([])
+        expect(collection).not_to have_received(:includes)
       end
     end
 
-    context "when include params are present and includable" do
-      let(:include_params) { {include: "books,posts.tags,comments"} }
+    context "with nested includes" do
+      subject(:author_query) { AuthorQuery.new({}) }
 
-      it "splits includes params to an array of nested includes" do
-        add_includes
+      it "adds nested includes as a single hash" do
+        author_query.add_includes(collection, "books,books.tags,books.comments")
 
-        expect(collection).to have_received(:includes).with([:books, {posts: :tags}, :comments])
+        expect(collection).to have_received(:includes).with(an_instance_of(Hash))
+      end
+
+      it "adds nested relationships next to top level relationships" do
+        author_query.add_includes(collection, "address,books.tags")
+
+        expect(collection).to have_received(:includes).with(:address, books: :tags)
+      end
+
+      it "does not include relationships that have nested includes" do
+        author_query.add_includes(collection, "books,books.tags,books.comments")
+
+        expect(collection).not_to have_received(:includes).with(array_including(:books))
+      end
+
+      it "includes single nested includes as parent - nested relationship" do
+        author_query.add_includes(collection, "books.tags")
+
+        expect(collection).to have_received(:includes).with(books: :tags)
+      end
+
+      it "includes multiple nested includes as parent - nested relationships array" do
+        author_query.add_includes(collection, "books.tags,books.comments")
+
+        expect(collection).to have_received(:includes).with(books: [:tags, :comments])
+      end
+
+      it "includes all depths of relationships" do
+        author_query.add_includes(collection, "books.tags,books.comments.user")
+
+        expect(collection).to have_received(:includes).with(books: [:tags, { comments: :user }])
       end
     end
   end

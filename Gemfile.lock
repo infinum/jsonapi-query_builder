@@ -20,19 +20,27 @@ GEM
       tzinfo (~> 1.1)
       zeitwerk (~> 2.2, >= 2.2.2)
     ast (2.4.1)
+    attr_extras (6.2.4)
     concurrent-ruby (1.1.7)
     diff-lcs (1.4.4)
     i18n (1.8.5)
       concurrent-ruby (~> 1.0)
+    io-console (0.5.6)
+    irb (1.2.7)
+      reline (>= 0.1.5)
     lefthook (0.7.2)
     minitest (5.14.2)
     pagy (3.9.0)
     parallel (1.20.1)
     parser (2.7.2.0)
       ast (~> 2.4.1)
+    patience_diff (1.1.0)
+      trollop (~> 1.16)
     rainbow (3.0.0)
     rake (13.0.1)
     regexp_parser (1.8.2)
+    reline (0.1.9)
+      io-console (~> 0.5)
     rexml (3.2.4)
     rspec (3.10.0)
       rspec-core (~> 3.10.0)
@@ -68,7 +76,12 @@ GEM
     standard (0.9.0)
       rubocop (= 1.2.0)
       rubocop-performance (= 1.8.1)
+    super_diff (0.5.2)
+      attr_extras (>= 6.2.4)
+      diff-lcs
+      patience_diff
     thread_safe (0.3.6)
+    trollop (1.16.2)
     tzinfo (1.2.8)
       thread_safe (~> 0.1)
     unicode-display_width (1.7.0)
@@ -79,12 +92,14 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 2.0)
+  irb
   jsonapi-query_builder!
   lefthook
   rake
   rspec
   rubocop-rspec
   standard
+  super_diff
 
 BUNDLED WITH
    2.1.4

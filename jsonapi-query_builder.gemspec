@@ -45,6 +45,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "standard"
+  spec.add_development_dependency "super_diff"
   spec.add_development_dependency "rubocop-rspec"
   spec.add_development_dependency "lefthook"
+  spec.add_development_dependency "irb"
 end

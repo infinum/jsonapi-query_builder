@@ -5,16 +5,16 @@ module Jsonapi
     module Mixins
       module Sort
         class Param
-          attr_reader :descending, :attribute
-
-          def initialize(param)
-            @descending, @attribute = deserialize(param)
-          end
-
           class << self
             def deserialize_params(sort_params)
               (sort_params || "").split(",").map(&method(:new))
             end
+          end
+
+          attr_reader :descending, :attribute
+
+          def initialize(param)
+            @descending, @attribute = deserialize(param)
           end
 
           def deserialize(param)
