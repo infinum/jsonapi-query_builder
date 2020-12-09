@@ -4,6 +4,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Include::Param do
   subject(:include_param) { described_class.new(parameter) }
 
   let(:parameter) { "books.author.address" }
+  # { books: [{author: [:address]}]}
 
   it "strips param" do
     expect(described_class.new(" books ")).to have_attributes relationship: :books
