@@ -1,0 +1,92 @@
+PATH
+  remote: .
+  specs:
+    jsonapi-query_builder (0.1.7)
+      activerecord (>= 5)
+      pagy (~> 3.5)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activemodel (6.1.1)
+      activesupport (= 6.1.1)
+    activerecord (6.1.1)
+      activemodel (= 6.1.1)
+      activesupport (= 6.1.1)
+    activesupport (6.1.1)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 1.6, < 2)
+      minitest (>= 5.1)
+      tzinfo (~> 2.0)
+      zeitwerk (~> 2.3)
+    ast (2.4.1)
+    concurrent-ruby (1.1.7)
+    diff-lcs (1.4.4)
+    i18n (1.8.7)
+      concurrent-ruby (~> 1.0)
+    lefthook (0.7.2)
+    minitest (5.14.3)
+    pagy (3.10.0)
+    parallel (1.20.1)
+    parser (3.0.0.0)
+      ast (~> 2.4.1)
+    rainbow (3.0.0)
+    rake (13.0.3)
+    regexp_parser (2.0.3)
+    rexml (3.2.4)
+    rspec (3.10.0)
+      rspec-core (~> 3.10.0)
+      rspec-expectations (~> 3.10.0)
+      rspec-mocks (~> 3.10.0)
+    rspec-core (3.10.1)
+      rspec-support (~> 3.10.0)
+    rspec-expectations (3.10.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.10.0)
+    rspec-mocks (3.10.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.10.0)
+    rspec-support (3.10.1)
+    rubocop (1.7.0)
+      parallel (~> 1.10)
+      parser (>= 2.7.1.5)
+      rainbow (>= 2.2.2, < 4.0)
+      regexp_parser (>= 1.8, < 3.0)
+      rexml
+      rubocop-ast (>= 1.2.0, < 2.0)
+      ruby-progressbar (~> 1.7)
+      unicode-display_width (>= 1.4.0, < 2.0)
+    rubocop-ast (1.4.0)
+      parser (>= 2.7.1.5)
+    rubocop-performance (1.9.2)
+      rubocop (>= 0.90.0, < 2.0)
+      rubocop-ast (>= 0.4.0)
+    rubocop-rspec (2.1.0)
+      rubocop (~> 1.0)
+      rubocop-ast (>= 1.1.0)
+    ruby-progressbar (1.11.0)
+    standard (0.11.0)
+      rubocop (= 1.7.0)
+      rubocop-performance (= 1.9.2)
+    standardrb (1.0.0)
+      standard
+    tzinfo (2.0.4)
+      concurrent-ruby (~> 1.0)
+    unicode-display_width (1.7.0)
+    zeitwerk (2.4.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 2.0)
+  jsonapi-query_builder!
+  lefthook
+  rake (~> 13.0)
+  rspec (~> 3.0)
+  rubocop-rspec
+  standard
+  standardrb
+
+BUNDLED WITH
+   2.1.4
