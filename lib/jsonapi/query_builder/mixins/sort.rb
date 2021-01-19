@@ -21,22 +21,46 @@ module Jsonapi
             @supported_sorts || {}
           end
 
+          # Ensures deterministic ordering. Defaults to :id in ascending direction.
+          # @param [Array<Symbol, String, Hash>] attributes An array of attributes or a hash with the attribute and it's
+          #   order direction.
           def unique_sort_attributes(*attributes)
             @_unique_sort_attributes = attributes
           end
 
           alias_method :unique_sort_attribute, :unique_sort_attributes
 
+          # The :default_sort: can be set to sort by any field like `created_at` timestamp or similar. It is only used
+          # if no sort parameter is set, unlike the `unique_sort_attribute` which is always appended as the last sort
+          # attribute. The parameters are passed directly to the underlying active record relation, so the usual
+          # ordering options are possible.
+          # @param [Symbol, Hash] options A default sort attribute or a Hash with the attribute and it's order direction.
           def default_sort(options)
             @_default_sort = options
           end
 
+          # Registers attribute that can be used for sorting. Sorting parameters are usually parsed from the `json:api`
+          # sort query parameter in the order they are given.
+          # @param [Symbol] attribute The "sortable" attribute
+          # @param [proc, Class] sort A proc or a sort class, defaults to a simple order(attribute => direction)
           def sorts_by(attribute, sort = nil)
             sort ||= ->(collection, direction) { collection.order(attribute => direction) }
             @supported_sorts = {**supported_sorts, attribute => sort}
           end
         end
 
+        # Sorts the passed relation with the default sort params (parsed from the queries params) or with explicitly
+        # passed sort parameters.
+        # Parses each sort parameter and looks for the sorting strategy for it, if the strategy responds to a call
+        # method it calls it with the collection and parameter's parsed sort direction, otherwise it instantiates the
+        # sort class with the collection and the parameter's parsed sort direction and calls for the results. Finally it
+        # adds the unique sort attributes to enforce deterministic results. If sort params are blank, it adds the
+        # default sort attributes before setting the unique sort attributes.
+        # @param [ActiveRecord::Relation] collection
+        # @param [Object] sort_params Optional explicit sort params
+        # @return [ActiveRecord::Relation] Sorted relation
+        # @raise [Jsonapi::QueryBuilder::Mixins::Sort::UnpermittedSortParameters] if not all sort parameters are
+        #   permitted
         def sort(collection, sort_params = send(:sort_params))
           sort_params = Param.deserialize_params(sort_params)
           ensure_permitted_sort_params!(sort_params) if sort_params

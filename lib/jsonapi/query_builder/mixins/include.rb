@@ -4,6 +4,11 @@ module Jsonapi
   module QueryBuilder
     module Mixins
       module Include
+        # Eager loads the relationships that will be included in the response, based on the Json:Api
+        # include query parameter.
+        # @param [ActiveRecord::Relation] collection
+        # @param [Object] include_params Optional explicit include params
+        # @return [ActiveRecord::Relation] Collection with eager loaded included relations
         def add_includes(collection, include_params = send(:include_params))
           collection.includes(formatted_include_params(include_params))
         end
