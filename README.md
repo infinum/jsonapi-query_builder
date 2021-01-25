@@ -165,6 +165,9 @@ filters_by :type, TypeFilter, if: :correct_type?
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can
 also run `bin/console` for an interactive prompt that will allow you to experiment.
 
+We're using `standardrb` and `lefthook`. You can install lefthook hooks via `lefthook install`. It will run linters and
+standardrb checks before commits, and a bundle audit + whole spec suite before push.
+
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the
 version number in `version.rb`, and then run `LEFTHOOK=0 bundle exec rake release`, which will create a git tag for the
 version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
