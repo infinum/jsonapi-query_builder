@@ -1,4 +1,4 @@
-# Jsonapi::QueryBuilder
+# Jsonapi::QueryBuilder ![lint](https://github.com/infinum/jsonapi-query_builder/workflows/lint/badge.svg)![spec](https://github.com/infinum/jsonapi-query_builder/workflows/spec/badge.svg)
 
 `Jsonapi::QueryBuilder` serves the purpose of adding the json api query related SQL conditions to the already scoped
 collection, usually used in controller index actions. 
