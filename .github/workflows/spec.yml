@@ -1,0 +1,23 @@
+name: spec
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  rake-spec:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        ruby: [2.5, 2.6, 2.7, 3.0]
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: rake spec
+        run: bundle exec rake spec
