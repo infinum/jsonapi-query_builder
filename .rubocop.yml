@@ -4,5 +4,8 @@ require:
 RSpec/NestedGroups:
   Max: 4
 
+RSpec/MultipleMemoizedHelpers:
+  Max: 7
+
 AllCops:
   NewCops: enable
