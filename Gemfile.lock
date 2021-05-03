@@ -3,7 +3,6 @@ PATH
   specs:
     jsonapi-query_builder (0.1.8)
       activerecord (>= 5)
-      pagy (~> 3.5)
 
 GEM
   remote: https://rubygems.org/
@@ -82,6 +81,7 @@ DEPENDENCIES
   bundler (~> 2.0)
   jsonapi-query_builder!
   lefthook
+  pagy (~> 3.5)
   rake (~> 13.0)
   rspec (~> 3.0)
   rubocop-rspec
