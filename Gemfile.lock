@@ -1,32 +1,32 @@
 PATH
   remote: .
   specs:
-    jsonapi-query_builder (0.1.8)
+    jsonapi-query_builder (0.1.9)
       activerecord (>= 5)
       pagy (~> 3.5)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (6.1.1)
-      activesupport (= 6.1.1)
-    activerecord (6.1.1)
-      activemodel (= 6.1.1)
-      activesupport (= 6.1.1)
-    activesupport (6.1.1)
+    activemodel (6.1.3.1)
+      activesupport (= 6.1.3.1)
+    activerecord (6.1.3.1)
+      activemodel (= 6.1.3.1)
+      activesupport (= 6.1.3.1)
+    activesupport (6.1.3.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
       tzinfo (~> 2.0)
       zeitwerk (~> 2.3)
     ast (2.4.1)
-    concurrent-ruby (1.1.7)
+    concurrent-ruby (1.1.8)
     diff-lcs (1.4.4)
-    i18n (1.8.7)
+    i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     lefthook (0.7.2)
-    minitest (5.14.3)
-    pagy (3.10.0)
+    minitest (5.14.4)
+    pagy (3.11.0)
     parallel (1.20.1)
     parser (3.0.0.0)
       ast (~> 2.4.1)
