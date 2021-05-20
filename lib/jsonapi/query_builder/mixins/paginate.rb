@@ -1,30 +1,33 @@
 # frozen_string_literal: true
 
+require 'jsonapi/query_builder/pagination_strategy/pagy'
+
 module Jsonapi
   module QueryBuilder
     module Mixins
       module Paginate
-        include Pagy::Backend
-
-        attr_reader :pagination_details
-
         # Paginates the collection and returns the requested page. Also sets the pagination details that can be used for
         # displaying metadata in the Json:Api response.
         # @param [ActiveRecord::Relation] collection
-        # @param [Object] page_params Optional explicit pagination params
         # @return [ActiveRecord::Relation] Paged collection
-        def paginate(collection, page_params = send(:page_params))
-          @pagination_details, records = pagy collection, page: page_params[:number],
-                                                          items: page_params[:size],
-                                                          outset: page_params[:offset]
+        def paginate(collection)
+          pagination_strategy.paginate(collection)
+        end
 
-          records
+        def pagination_details
+          pagination_strategy.pagination_details
         end
 
         private
 
-        def page_params
-          {number: 1, **params.fetch(:page, {})}
+        def pagination_strategy
+          @pagination_strategy ||= pagination_strategy_class.new(params: params)
+        end
+
+        def pagination_strategy_class
+          if defined?(Pagy)
+            Jsonapi::QueryBuilder::PaginationStrategy::Pagy
+          end
         end
       end
     end

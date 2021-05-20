@@ -53,6 +53,12 @@ module Jsonapi
       def find_by!(**kwargs)
         add_includes(collection).find_by!(kwargs)
       end
+
+      # Overribale hash that returns additional serializer options
+      # @return [Hash]
+      def serializer_options
+        pagination_details
+      end
     end
   end
 end
