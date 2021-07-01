@@ -8,7 +8,10 @@ module Jsonapi
       class Pagy
         include ::Pagy::Backend
 
+        attr_reader :params
+
         def paginate(collection, params)
+          @params = params
           page_params = extract_page_params(params)
 
           details, records = pagy collection, page: page_params[:number],
