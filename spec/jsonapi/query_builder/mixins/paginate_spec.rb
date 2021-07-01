@@ -2,7 +2,7 @@
 
 RSpec.describe Jsonapi::QueryBuilder::Mixins::Paginate do
   let(:paged_query_class) do
-    Class.new {
+    Class.new do
       include Jsonapi::QueryBuilder::Mixins::Paginate
 
       attr_reader :params
@@ -10,13 +10,12 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Paginate do
       def initialize(params)
         @params = params
       end
-    }
+    end
   end
-  let(:paged_query) { PagedQuery.new params }
 
-  before do
-    stub_const "PagedQuery", paged_query_class
-  end
+  let(:paginator) { instance_double("paginator", paginate: [paged_collection, pagination_details]) }
+
+  let(:paged_query) { paged_query_class.new(params) }
 
   describe "#paginate" do
     subject(:paginate) { paged_query.paginate(collection) }
@@ -27,7 +26,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Paginate do
     let(:params) { {page: {number: 2, size: 20, offset: 0}} }
 
     before do
-      allow(paged_query).to receive(:pagy).and_return([pagination_details, paged_collection])
+      paged_query.paginator = paginator
     end
 
     it "returns the paged collection" do
@@ -40,30 +39,10 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Paginate do
       expect(paged_query.pagination_details).to eql(pagination_details)
     end
 
-    it "passes the params to pagy" do
+    it "passes the collection and params to paginator" do
       paginate
 
-      expect(paged_query).to have_received(:pagy).with(anything, page: 2, items: 20, outset: 0)
-    end
-
-    it "defaults to page number 1" do
-      params[:page].delete(:number)
-
-      paginate
-
-      expect(paged_query).to have_received(:pagy).with(anything, hash_including(page: 1))
-    end
-
-    context "when paginate params are passed explicitly to #paginate" do
-      subject(:paginate) { paged_query.paginate(collection, page_params) }
-
-      let(:page_params) { {number: 3, size: 30} }
-
-      it "overrides with the passed page params" do
-        paginate
-
-        expect(paged_query).to have_received(:pagy).with(anything, hash_including(page: 3, items: 30))
-      end
+      expect(paginator).to have_received(:paginate).with(collection, params)
     end
   end
 end

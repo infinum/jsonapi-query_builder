@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "active_record"
+require "jsonapi/query_builder/paginator/pagy"
 
 RSpec.describe Jsonapi::QueryBuilder do
   it "has a version number" do
@@ -51,6 +52,7 @@ RSpec.describe Jsonapi::QueryBuilder do
     before do
       stub_const "TypeFilter", type_filter_class
       stub_const "Query", query_class
+      query.paginator = Jsonapi::QueryBuilder::Paginator::Pagy.new
 
       allow(collection).to receive(:order).and_return(collection)
       allow(collection).to receive(:includes).and_return(collection)
