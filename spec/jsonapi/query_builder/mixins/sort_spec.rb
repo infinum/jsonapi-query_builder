@@ -164,7 +164,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
       context "when query does not support nested parameters" do
         it "raises an unpermitted sort parameters error" do
           expect { sort }.to raise_error(
-            Jsonapi::QueryBuilder::Mixins::Sort::UnpermittedSortParameters,
+            Jsonapi::QueryBuilder::Errors::UnpermittedSortParameters,
             "email and birth_date are not permitted sort attributes"
           )
         end

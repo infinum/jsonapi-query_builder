@@ -4,7 +4,20 @@ module Jsonapi
   module QueryBuilder
     module Mixins
       module Paginate
-        include Pagy::Backend
+        extend ActiveSupport::Concern
+
+        class_methods do
+          # Sets the paginator used to page the results. Defaults to Pagy
+          #
+          # @param [Jsonapi::QueryBuilder::Paginator::BasePaginator] paginator A subclass of BasePaginator
+          def paginator(paginator)
+            @paginator = paginator
+          end
+
+          def _paginator
+            @paginator || Paginator::Pagy
+          end
+        end
 
         attr_reader :pagination_details
 
@@ -14,9 +27,7 @@ module Jsonapi
         # @param [Object] page_params Optional explicit pagination params
         # @return [ActiveRecord::Relation] Paged collection
         def paginate(collection, page_params = send(:page_params))
-          @pagination_details, records = pagy collection, page: page_params[:number],
-                                                          items: page_params[:size],
-                                                          outset: page_params[:offset]
+          records, @pagination_details = self.class._paginator.new(collection).paginate(page_params)
 
           records
         end
