@@ -44,7 +44,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Filter do
         FilterableQuery.filters_by :last_name, query_parameter: "surname"
 
         expect(FilterableQuery.supported_filters).to include(first_name: include(query_parameter: "name"),
-                                                             last_name: include(query_parameter: "surname"))
+          last_name: include(query_parameter: "surname"))
       end
     end
   end

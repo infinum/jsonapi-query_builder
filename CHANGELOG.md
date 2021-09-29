@@ -1,5 +1,10 @@
 # Change log
 
+## 0.2.0 (2021-09-29)
+Added support for Kaminari and Keyset pagination strategies in addition to Pagy.
+
+- [#21](https://github.com/infinum/jsonapi-query_builder/pull/21): Extract paginators.
+
 ## 0.1.9 (2021-05-07)
 
 - [#18](https://github.com/infinum/jsonapi-query_builder/pull/18): Remove Ruby `to` version.
