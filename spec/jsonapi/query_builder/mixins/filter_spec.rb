@@ -3,9 +3,9 @@
 RSpec.describe Jsonapi::QueryBuilder::Mixins::Filter do
   describe "DSL" do
     subject(:filterable_query_class) do
-      Class.new {
+      Class.new do
         include Jsonapi::QueryBuilder::Mixins::Filter
-      }
+      end
     end
 
     before do

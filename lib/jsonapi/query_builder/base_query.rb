@@ -5,6 +5,8 @@ require "jsonapi/query_builder/mixins/include"
 require "jsonapi/query_builder/mixins/paginate"
 require "jsonapi/query_builder/mixins/sort"
 
+require "jsonapi/query_builder/paginator"
+
 module Jsonapi
   module QueryBuilder
     class BaseQuery

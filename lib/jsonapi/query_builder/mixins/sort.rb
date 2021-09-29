@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 require "jsonapi/query_builder/mixins/sort/param"
+require "jsonapi/query_builder/errors/unpermitted_sort_parameters"
 
 module Jsonapi
   module QueryBuilder
     module Mixins
       module Sort
         extend ActiveSupport::Concern
-
-        UnpermittedSortParameters = Class.new ArgumentError
 
         class_methods do
           attr_reader :_default_sort
@@ -59,7 +58,7 @@ module Jsonapi
         # @param [ActiveRecord::Relation] collection
         # @param [Object] sort_params Optional explicit sort params
         # @return [ActiveRecord::Relation] Sorted relation
-        # @raise [Jsonapi::QueryBuilder::Mixins::Sort::UnpermittedSortParameters] if not all sort parameters are
+        # @raise [Jsonapi::QueryBuilder::Errors::UnpermittedSortParameters] if not all sort parameters are
         #   permitted
         def sort(collection, sort_params = send(:sort_params))
           sort_params = Param.deserialize_params(sort_params)
@@ -80,11 +79,7 @@ module Jsonapi
           unpermitted_parameters = sort_params.map(&:attribute).map(&:to_sym) - self.class.supported_sorts.keys
           return if unpermitted_parameters.size.zero?
 
-          raise UnpermittedSortParameters, [
-            unpermitted_parameters.to_sentence,
-            unpermitted_parameters.count == 1 ? "is not a" : "are not",
-            "permitted sort attribute".pluralize(unpermitted_parameters.count)
-          ].join(" ")
+          raise Errors::UnpermittedSortParameters, unpermitted_parameters
         end
 
         def add_order_attributes(collection, sort_params)

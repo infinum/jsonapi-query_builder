@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "active_record"
-
 RSpec.describe Jsonapi::QueryBuilder do
   it "has a version number" do
     expect(Jsonapi::QueryBuilder::VERSION).not_to be nil
@@ -12,6 +10,8 @@ RSpec.describe Jsonapi::QueryBuilder do
 
     let(:query_class) {
       Class.new(Jsonapi::QueryBuilder::BaseQuery) {
+        paginator Jsonapi::QueryBuilder::Paginator::Pagy
+
         default_sort :last_name
         sorts_by :first_name
         sorts_by :last_name
