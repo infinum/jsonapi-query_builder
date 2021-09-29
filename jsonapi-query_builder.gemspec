@@ -42,6 +42,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency "pagy", "~> 3.5"
 
   spec.add_development_dependency "bundler", "~> 2.0"
+  spec.add_development_dependency "bundler-audit"
   spec.add_development_dependency "rake", "~> 13.0"
   spec.add_development_dependency "rspec", "~> 3.0"
   spec.add_development_dependency "standardrb"
