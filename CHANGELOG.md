@@ -1,5 +1,9 @@
 # Change log
 
+## 0.2.1 (2021-10-04)
+
+- [#22](https://github.com/infinum/jsonapi-query_builder/pull/22): Bump allowed pagy version.
+
 ## 0.2.0 (2021-09-29)
 Added support for Kaminari and Keyset pagination strategies in addition to Pagy.
 
