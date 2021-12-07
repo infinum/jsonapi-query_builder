@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jsonapi-query_builder (0.2.1)
+    jsonapi-query_builder (0.3.0)
       activerecord (>= 5)
       pagy (>= 3.5)
 
