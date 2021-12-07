@@ -7,7 +7,7 @@ module Jsonapi
 
       # @param [ActiveRecord::Relation] collection
       # @param [Symbol] direction of the ordering, one of :asc or :desc
-      def initialize(collection, direction)
+      def initialize(collection, direction = :asc)
         @collection = collection
         @direction = direction
       end

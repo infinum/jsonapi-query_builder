@@ -84,7 +84,7 @@ module Jsonapi
 
         def add_order_attributes(collection, sort_params)
           return collection if self.class._default_sort.nil? && sort_params.blank?
-          return collection.order(self.class._default_sort) if sort_params.blank?
+          return sort_by_default(collection) if sort_params.blank?
 
           sort_params.reduce(collection) do |sorted_collection, sort_param|
             sort = self.class.supported_sorts.fetch(sort_param.attribute.to_sym)
@@ -94,6 +94,18 @@ module Jsonapi
             else
               sort.new(sorted_collection, sort_param.direction).results
             end
+          end
+        end
+
+        def sort_by_default(collection)
+          default_sort = self.class._default_sort
+
+          if default_sort.is_a?(Symbol) || default_sort.is_a?(Hash)
+            collection.order(default_sort)
+          elsif default_sort.respond_to?(:call)
+            default_sort.call(collection)
+          else
+            default_sort.new(collection).results
           end
         end
 

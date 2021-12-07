@@ -36,6 +36,19 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
 
         expect(SortableQuery._default_sort).to eql created_at: :desc
       end
+
+      it "sets the default sort to a proc" do
+        SortableQuery.default_sort ->(collection) { collection.order(created_at: :desc) }
+
+        expect(SortableQuery._default_sort).to be_an_instance_of(Proc)
+      end
+
+      it "sets the default sort to a sort class" do
+        street_sort_class = class_double "StreetSort"
+        SortableQuery.default_sort street_sort_class
+
+        expect(SortableQuery._default_sort).to be street_sort_class
+      end
     end
 
     describe ".sorts_by" do
@@ -155,6 +168,43 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
         sort
 
         expect(collection).to have_received(:order).with(id: :asc)
+      end
+
+      context "when default sort has a direction set" do
+        before do
+          SortableQuery.default_sort first_name: :desc
+        end
+
+        it "add the default sort with the direction" do
+          sort
+
+          expect(collection).to have_received(:order).with(first_name: :desc)
+        end
+      end
+
+      context "when default sort is a proc" do
+        before do
+          SortableQuery.default_sort ->(collection) { collection.order(first_name: :desc) }
+        end
+
+        it "applies the sort proc" do
+          sort
+
+          expect(collection).to have_received(:order).with(first_name: :desc)
+        end
+      end
+
+      context "when default sort is a sort object" do
+        before do
+          SortableQuery.default_sort StreetSort
+        end
+
+        it "sorts with the sort object", :aggregate_failures do
+          sort
+
+          expect(StreetSort).to have_received(:new).with(collection)
+          expect(street_sort_instance).to have_received(:results)
+        end
       end
     end
 
