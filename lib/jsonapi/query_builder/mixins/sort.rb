@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "jsonapi/query_builder/mixins/sort/param"
+require "jsonapi/query_builder/mixins/sort/static"
+require "jsonapi/query_builder/mixins/sort/dynamic"
 require "jsonapi/query_builder/errors/unpermitted_sort_parameters"
 
 module Jsonapi
@@ -18,6 +20,10 @@ module Jsonapi
 
           def supported_sorts
             @supported_sorts || {}
+          end
+
+          def supported_dynamic_sorts
+            @supported_dynamic_sorts || []
           end
 
           # Ensures deterministic ordering. Defaults to :id in ascending direction.
@@ -43,8 +49,15 @@ module Jsonapi
           # @param [Symbol] attribute The "sortable" attribute
           # @param [proc, Class] sort A proc or a sort class, defaults to a simple order(attribute => direction)
           def sorts_by(attribute, sort = nil)
-            sort ||= ->(collection, direction) { collection.order(attribute => direction) }
-            @supported_sorts = {**supported_sorts, attribute => sort}
+            @supported_sorts = {**supported_sorts, attribute => Sort::Static.new(attribute, sort)}
+          end
+
+          # Registers attribute that can be dynamically used for sorting. Sorting parameters are usually parsed from the
+          # `json:api` sort query parameter in the order they are given.
+          # @param [Symbol] attribute_prefix The "sortable" attribute prefix, e.g. `:data` for sorting by `data.name` and `data.created_at`
+          # @param [proc, Class] sort A proc or a sort class, defaults to a simple order(attribute => direction)
+          def dynamically_sorts_by(attribute_prefix, sort)
+            @supported_dynamic_sorts = [*supported_dynamic_sorts, Sort::Dynamic.new(attribute_prefix, sort)]
           end
         end
 
@@ -76,7 +89,11 @@ module Jsonapi
         end
 
         def ensure_permitted_sort_params!(sort_params)
-          unpermitted_parameters = sort_params.map(&:attribute).map(&:to_sym) - self.class.supported_sorts.keys
+          unpermitted_parameters = sort_params.map(&:attribute).filter do |attribute|
+            next false if self.class.supported_sorts.key?(attribute.to_sym)
+
+            self.class.supported_dynamic_sorts.none? { |dynamic_sort| dynamic_sort.matches?(attribute) }
+          end
           return if unpermitted_parameters.size.zero?
 
           raise Errors::UnpermittedSortParameters, unpermitted_parameters
@@ -87,13 +104,11 @@ module Jsonapi
           return sort_by_default(collection) if sort_params.blank?
 
           sort_params.reduce(collection) do |sorted_collection, sort_param|
-            sort = self.class.supported_sorts.fetch(sort_param.attribute.to_sym)
-
-            if sort.respond_to?(:call)
-              sort.call(sorted_collection, sort_param.direction)
-            else
-              sort.new(sorted_collection, sort_param.direction).results
+            sort = self.class.supported_sorts.fetch(sort_param.attribute.to_sym) do
+              self.class.supported_dynamic_sorts.find { |dynamic_sort| dynamic_sort.matches?(sort_param.attribute) }
             end
+
+            sort.results(sorted_collection, sort_param)
           end
         end
 
