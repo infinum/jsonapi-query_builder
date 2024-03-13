@@ -61,7 +61,9 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
       it "adds a default sort proc" do
         SortableQuery.sorts_by :first_name
 
-        expect(SortableQuery.supported_sorts).to include(first_name: an_instance_of(Proc))
+        expect(SortableQuery.supported_sorts)
+          .to include(first_name: an_instance_of(Jsonapi::QueryBuilder::Mixins::Sort::Static)
+                                    .and(have_attributes(attribute: :first_name, sort: Proc)))
       end
 
       it "adds a custom sort" do
@@ -69,7 +71,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
 
         SortableQuery.sorts_by :first_name, sort
 
-        expect(SortableQuery.supported_sorts).to include(first_name: sort)
+        expect(SortableQuery.supported_sorts).to include(first_name: have_attributes(sort: sort))
       end
 
       it "can add multiple different sorts" do
@@ -77,6 +79,26 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
         SortableQuery.sorts_by :last_name
 
         expect(SortableQuery.supported_sorts).to include(:first_name, :last_name)
+      end
+    end
+
+    describe ".dynamically_sorts_by" do
+      it "registers a supported dynamic sort attribute" do
+        sort = Class.new(Jsonapi::QueryBuilder::DynamicSort)
+        SortableQuery.dynamically_sorts_by :address, sort
+
+        expect(SortableQuery.supported_dynamic_sorts)
+          .to include(an_instance_of(Jsonapi::QueryBuilder::Mixins::Sort::Dynamic)
+                        .and(have_attributes(attribute_prefix: "address", sort: sort)))
+      end
+
+      it "can add multiple different dynamic sorts" do
+        sort = Class.new(Jsonapi::QueryBuilder::DynamicSort)
+        SortableQuery.dynamically_sorts_by :address, sort
+        SortableQuery.dynamically_sorts_by :email, sort
+
+        expect(SortableQuery.supported_dynamic_sorts).to include(have_attributes(attribute_prefix: "address"),
+          have_attributes(attribute_prefix: "email"))
       end
     end
   end
@@ -93,6 +115,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
         unique_sort_attribute id: :asc
         sorts_by :last_name
         sorts_by :first_name, ->(collection, direction) { collection.order(name: direction) }
+        dynamically_sorts_by :'data.', DynamicSort
         sorts_by :'address.street', StreetSort
 
         def initialize(collection, params)
@@ -103,11 +126,14 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
     }
     let(:street_sort_class) { class_double "StreetSort", new: street_sort_instance }
     let(:street_sort_instance) { instance_double "street_sort", results: collection }
+    let(:dynamic_sort_class) { class_double "DynamicSort", new: dynamic_sort_instance }
+    let(:dynamic_sort_instance) { instance_double "dynamic_sort", results: collection }
     let(:collection) { instance_double "collection" }
-    let(:params) { {sort: "first_name,-last_name,address.street"} }
+    let(:params) { {sort: "first_name,-last_name,address.street,data.foobar"} }
 
     before do
       stub_const "StreetSort", street_sort_class
+      stub_const "DynamicSort", dynamic_sort_class
       stub_const "SortableQuery", sortable_query_class
 
       allow(collection).to receive(:order).and_return(collection)
@@ -132,6 +158,13 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
 
       expect(StreetSort).to have_received(:new).with(collection, :asc)
       expect(street_sort_instance).to have_received(:results)
+    end
+
+    it "sorts by present dynamic sort" do
+      sort
+
+      expect(DynamicSort).to have_received(:new).with(collection, "foobar", :asc)
+      expect(dynamic_sort_instance).to have_received(:results)
     end
 
     it "adds the unique sort attribute" do
@@ -209,7 +242,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
     end
 
     context "when one or more of sort params is not permitted" do
-      let(:params) { {sort: "first_name,email,-birth_date"} }
+      let(:params) { {sort: "first_name,-data.some_nested_prop,email,-birth_date"} }
 
       context "when query does not support nested parameters" do
         it "raises an unpermitted sort parameters error" do
