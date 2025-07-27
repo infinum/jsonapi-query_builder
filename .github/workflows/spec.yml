@@ -8,10 +8,10 @@ on:
 
 jobs:
   rake-spec:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
-        ruby: [2.5, 2.6, 2.7, 3.0, 3.1]
+        ruby: ['2.5', '2.6', '2.7', '3.0', '3.1']
 
     steps:
       - uses: actions/checkout@v2
