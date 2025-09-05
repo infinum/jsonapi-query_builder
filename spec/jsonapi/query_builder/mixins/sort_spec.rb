@@ -93,7 +93,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
         unique_sort_attribute id: :asc
         sorts_by :last_name
         sorts_by :first_name, ->(collection, direction) { collection.order(name: direction) }
-        sorts_by :'address.street', StreetSort
+        sorts_by :"address.street", StreetSort
 
         def initialize(collection, params)
           @collection = collection

@@ -9,11 +9,11 @@ RSpec.describe Jsonapi::QueryBuilder::Paginator::Kaminari do
     let(:collection) { instance_double "collection" }
     let(:paged_collection) do
       instance_double "paged-collection", current_page: 2,
-                                          limit_value: 20,
-                                          total_count: 35,
-                                          total_pages: 2,
-                                          next_page: nil,
-                                          prev_page: 1
+        limit_value: 20,
+        total_count: 35,
+        total_pages: 2,
+        next_page: nil,
+        prev_page: 1
     end
 
     before do

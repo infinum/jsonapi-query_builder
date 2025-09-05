@@ -2,7 +2,7 @@ lint:
   commands: &lint
     lint-frozen-strings:
       glob: "*.rb"
-      run: bundle exec rubocop --only Style/FrozenStringLiteralComment,Layout/EmptyLineAfterMagicComment --format quiet --auto-correct
+      run: bundle exec rubocop --only Style/FrozenStringLiteralComment,Layout/EmptyLineAfterMagicComment --format quiet --autocorrect
 
 rubocop:
   commands: &rubocop
@@ -13,8 +13,7 @@ rubocop:
 pre-commit:
   parallel: true
   commands:
-    <<: *lint
-    <<: *rubocop
+    <<: [*lint, *rubocop]
     standardrb:
       glob: "*.rb"
       run: bundle exec standardrb {staged_files}
