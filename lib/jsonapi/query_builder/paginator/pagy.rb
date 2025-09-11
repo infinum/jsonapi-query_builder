@@ -12,9 +12,8 @@ module Jsonapi
         def paginate(page_params)
           @params = {page: page_params}
 
-          pagination_details, records = pagy collection, page: page_params[:number],
-                                                         items: page_params[:size],
-                                                         outset: page_params[:offset]
+          pagination_details, records = pagy(collection, page: page_params[:number], items: page_params[:size], outset: page_params[:offset])
+
           [records, pagination_details]
         end
 
