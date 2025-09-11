@@ -8,7 +8,7 @@ on:
 
 jobs:
   rake-spec:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         ruby: ['3.2', '3.3', '3.4']
