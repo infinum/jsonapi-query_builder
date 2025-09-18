@@ -17,7 +17,7 @@ module Jsonapi
           end
 
           def results(collection, sort_param)
-            dynamic_attribute = sort_param.attribute.sub(attribute_prefix, "")
+            dynamic_attribute = sort_param.attribute.delete_prefix(attribute_prefix)
             if sort.respond_to?(:call)
               sort.call(collection, dynamic_attribute, sort_param.direction)
             else
