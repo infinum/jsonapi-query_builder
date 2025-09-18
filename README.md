@@ -142,6 +142,38 @@ But since we're devout followers of the SOLID principles, we can define a sort c
 which returns the sorted collection. Under the hood the sort class is initialized with the current scope and the
 direction parameter.
 
+#### Dynamic sorting (prefix-based)
+
+Sometimes you want to allow sorting by a dynamic subset of attributes that share a common prefix (e.g., JSON/JSONB keys, translated columns, join records). You can register a dynamic sort by attribute prefix using `dynamically_sorts_by`.
+
+- The configured prefix is matched against each parsed sort attribute.
+- The prefix is stripped and only the dynamic part is passed to your sort handler.
+- You can provide either a lambda/proc or a class. The callable receives `(collection, dynamic_attribute, direction)`.
+
+Example with a lambda (PostgreSQL JSONB text value):
+
+```ruby
+# Allows sorting by any key in the `data` column: e.g. sort=-data.name,data.created_at
+dynamically_sorts_by :'data.', ->(collection, attribute, direction) {
+  # attribute is the part after the prefix, e.g. "name" or "created_at"
+  quoted_attribute = ActiveRecord::Base.connection.quote(attribute)
+  collection.order(Arel.sql("(data->>#{quoted_attribute}) #{direction}"))
+}
+```
+
+Example with a sort class (PostgreSQL JSONB text value):
+
+```ruby
+class DataSort < Jsonapi::QueryBuilder::DynamicSort
+  def results
+    quoted_attribute = ActiveRecord::Base.connection.quote(dynamic_attribute)
+    collection.order(Arel.sql("(data->>#{quoted_attribute}) #{direction}"))
+  end
+end
+
+dynamically_sorts_by :'data.', DataSort
+```
+
 ### Filtering
 
 #### Simple exact match filters
