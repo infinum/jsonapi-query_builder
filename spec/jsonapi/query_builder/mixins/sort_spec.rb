@@ -63,7 +63,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
 
         expect(SortableQuery.supported_sorts)
           .to include(first_name: an_instance_of(Jsonapi::QueryBuilder::Mixins::Sort::Static)
-                                    .and(have_attributes(attribute: :first_name, sort: Proc)))
+                                    .and(have_attributes(attribute: :first_name, sort: an_instance_of(Proc))))
       end
 
       it "adds a custom sort" do
