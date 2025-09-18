@@ -27,7 +27,7 @@ Or install it yourself as:
 
 ```ruby
 class UserQuery < Jsonapi::QueryBuilder::BaseQuery
-  ## pagination 
+  ## pagination
   paginator Jsonapi::QueryBuilder::Paginator::Pagy # default paginator
 
   ## sorting
@@ -62,9 +62,9 @@ pass the scoped collection to the `Jsonapi::QueryBuilder::BaseQuery` object.
 ### Pagination
 
 Pagination support is configurable using the `paginator` method to define the paginator. It defaults to the `Pagy`
-paginator, a lightweight and fast paginator. Other paginators currently supported are `Kaminari` and an implementation
-of keyset pagination. Before using these paginators we need to explicitly require the gems in our Gemfile and the
-paginator file in question. Additionally one can implement it's own paginator by inheriting
+paginator, a lightweight and fast paginator. Other paginators currently supported are `Kaminari`, `PagyCountless` and
+an implementation of keyset pagination. Before using these paginators we need to explicitly require the gems in our
+Gemfile and the paginator file in question. Additionally one can implement it's own paginator by inheriting
 from `Jsonapi::QueryBuilder::Paginator::BasePaginator`. The minimum required implementation is a `#paginate` method that
 receives page params and returns a page of the collection. It can return the pagination details as the second item of
 the returned array, that can be used in the serializer for pagination metadata.
@@ -83,6 +83,14 @@ paginator Jsonapi::QueryBuilder::Paginator::Kaminari
 require "jsonapi/query_builder/paginator/keyset"
 
 paginator Jsonapi::QueryBuilder::Paginator::Keyset
+```
+
+#### Using the Pagy Countless Paginator
+
+```ruby
+require "jsonapi/query_builder/paginator/pagy_countless"
+
+paginator Jsonapi::QueryBuilder::Paginator::PagyCountless
 ```
 
 ### Sorting
