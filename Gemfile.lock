@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    jsonapi-query_builder (0.3.0)
+    jsonapi-query_builder (0.4.0)
       activerecord (>= 7.2)
       pagy (>= 3.5)
 
@@ -154,7 +154,7 @@ GEM
     unicode-display_width (3.2.0)
       unicode-emoji (~> 4.1)
     unicode-emoji (4.1.0)
-    uri (1.0.3)
+    uri (1.0.4)
 
 PLATFORMS
   ruby

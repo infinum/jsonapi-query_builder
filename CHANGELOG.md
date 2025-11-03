@@ -1,5 +1,15 @@
 # Change log
 
+## 0.4.0 (2025-11-03)
+
+### Enhancements
+- Added support for dynamic (prefix-based) sorting [#31](https://github.com/infinum/jsonapi-query_builder/pull/31)
+- Added Pagy countless paginator [#26](https://github.com/infinum/jsonapi-query_builder/pull/26)
+
+### Changes
+- Dropped support for Ruby < 3.2
+- Dropped Rails < 7.2 support
+
 ## 0.3.0 (2021-12-07)
 
 ### Enhancements
