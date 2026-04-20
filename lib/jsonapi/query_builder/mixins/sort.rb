@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "jsonapi/query_builder/mixins/sort/param"
-require "jsonapi/query_builder/mixins/sort/static"
-require "jsonapi/query_builder/mixins/sort/dynamic"
-require "jsonapi/query_builder/errors/unpermitted_sort_parameters"
+require 'jsonapi/query_builder/mixins/sort/param'
+require 'jsonapi/query_builder/mixins/sort/static'
+require 'jsonapi/query_builder/mixins/sort/dynamic'
+require 'jsonapi/query_builder/errors/unpermitted_sort_parameters'
 
 module Jsonapi
   module QueryBuilder
@@ -15,7 +15,7 @@ module Jsonapi
           attr_reader :_default_sort
 
           def _unique_sort_attributes
-            @_unique_sort_attributes || [id: :asc]
+            @_unique_sort_attributes || [{ id: :asc }]
           end
 
           # @return [Hash<Symbol, Jsonapi::QueryBuilder::Mixins::Sort::Static>] Supported sorts
@@ -41,7 +41,8 @@ module Jsonapi
           # if no sort parameter is set, unlike the `unique_sort_attribute` which is always appended as the last sort
           # attribute. The parameters are passed directly to the underlying active record relation, so the usual
           # ordering options are possible.
-          # @param [Symbol, Hash] options A default sort attribute or a Hash with the attribute and it's order direction.
+          # @param [Symbol, Hash] options A default sort attribute or a Hash with the attribute and it's order
+          # direction.
           def default_sort(options)
             @_default_sort = options
           end
@@ -54,8 +55,10 @@ module Jsonapi
             supported_sorts[attribute] = Sort::Static.new(attribute, sort)
           end
 
-          # Registers an attribute prefix that can be dynamically used for sorting. Attribute prefix is stripped from parsed sort parameter and passed to the sort proc or class.
-          # @param [Symbol] attribute_prefix The "sortable" attribute prefix, e.g. `:'data.'` for sorting by `data.name` and `data.created_at`
+          # Registers an attribute prefix that can be dynamically used for sorting. Attribute prefix is stripped from
+          # parsed sort parameter and passed to the sort proc or class.
+          # @param [Symbol] attribute_prefix The "sortable" attribute prefix, e.g. `:'data.'` for sorting by `data.name`
+          # and `data.created_at`
           # @param [proc, Class] sort A proc or a sort class, defaults to a simple order(attribute => direction)
           def dynamically_sorts_by(attribute_prefix, sort)
             supported_dynamic_sorts << Sort::Dynamic.new(attribute_prefix, sort)
@@ -79,8 +82,8 @@ module Jsonapi
           ensure_permitted_sort_params!(sort_params) if sort_params
 
           collection
-            .yield_self { |c| add_order_attributes(c, sort_params) }
-            .yield_self(&method(:add_unique_order_attributes))
+            .then { |c| add_order_attributes(c, sort_params) }
+            .then(&method(:add_unique_order_attributes))
         end
 
         private
@@ -91,14 +94,15 @@ module Jsonapi
 
         def ensure_permitted_sort_params!(sort_params)
           unpermitted_parameters = sort_params.map(&:attribute).filter do |attribute|
-            !self.class.supported_sorts.key?(attribute.to_sym) && self.class.supported_dynamic_sorts.none? { |dynamic_sort| dynamic_sort.matches?(attribute) }
+            !self.class.supported_sorts.key?(attribute.to_sym) &&
+              self.class.supported_dynamic_sorts.none? { |dynamic_sort| dynamic_sort.matches?(attribute) }
           end
-          return if unpermitted_parameters.size.zero?
+          return if unpermitted_parameters.empty?
 
           raise Errors::UnpermittedSortParameters, unpermitted_parameters
         end
 
-        def add_order_attributes(collection, sort_params)
+        def add_order_attributes(collection, sort_params) # rubocop:disable Metrics/AbcSize
           return collection if self.class._default_sort.nil? && sort_params.blank?
           return sort_by_default(collection) if sort_params.blank?
 

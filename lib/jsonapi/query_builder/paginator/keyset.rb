@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "active_record"
+require 'active_record'
 
 module Jsonapi
   module QueryBuilder

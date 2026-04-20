@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require "jsonapi/query_builder/mixins/filter"
-require "jsonapi/query_builder/mixins/include"
-require "jsonapi/query_builder/mixins/paginate"
-require "jsonapi/query_builder/mixins/sort"
+require 'jsonapi/query_builder/mixins/filter'
+require 'jsonapi/query_builder/mixins/include'
+require 'jsonapi/query_builder/mixins/paginate'
+require 'jsonapi/query_builder/mixins/sort'
 
-require "jsonapi/query_builder/paginator"
+require 'jsonapi/query_builder/paginator'
 
 module Jsonapi
   module QueryBuilder
@@ -26,13 +26,14 @@ module Jsonapi
 
       # @return [ActiveRecord::Relation] A collection with eager loaded relationships based on include params, filtered,
       #   ordered and lastly, paginated.
-      # @note Pagination details are saved to an instance variable and can be accessed via the #pagination_details attribute reader
+      # @note Pagination details are saved to an instance variable and can be accessed via the #pagination_details
+      # attribute reader
       def results
         collection
-          .yield_self(&method(:add_includes))
-          .yield_self(&method(:sort))
-          .yield_self(&method(:filter))
-          .yield_self(&method(:paginate))
+          .then(&method(:add_includes))
+          .then(&method(:sort))
+          .then(&method(:filter))
+          .then(&method(:paginate))
       end
 
       # @param [integer, string] id

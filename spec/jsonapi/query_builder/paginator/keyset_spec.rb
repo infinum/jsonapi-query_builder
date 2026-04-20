@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require "support/active_record"
-require "jsonapi/query_builder/paginator/keyset"
+require 'support/active_record'
+require 'jsonapi/query_builder/paginator/keyset'
 
 # rubocop:disable RSpec/ExampleLength
 RSpec.describe Jsonapi::QueryBuilder::Paginator::Keyset do
@@ -16,8 +16,8 @@ RSpec.describe Jsonapi::QueryBuilder::Paginator::Keyset do
     SQL
   end
 
-  it "orders collection by the selected column" do
-    params = {column: :id}
+  it 'orders collection by the selected column' do
+    params = { column: :id }
     paginated_collection, _details = keyset_paginator.paginate(params)
 
     expect(paginated_collection.to_sql).to eq <<~SQL.squish
@@ -28,8 +28,8 @@ RSpec.describe Jsonapi::QueryBuilder::Paginator::Keyset do
     SQL
   end
 
-  it "applies selected limit" do
-    params = {column: :id, limit: 10}
+  it 'applies selected limit' do
+    params = { column: :id, limit: 10 }
     paginated_collection, _details = keyset_paginator.paginate(params)
 
     expect(paginated_collection.to_sql).to eq <<~SQL.squish
@@ -41,8 +41,8 @@ RSpec.describe Jsonapi::QueryBuilder::Paginator::Keyset do
   end
 
   context "when direction isn't provided" do
-    it "filters records after the selected position" do
-      params = {column: :id, limit: 10, position: 5}
+    it 'filters records after the selected position' do
+      params = { column: :id, limit: 10, position: 5 }
       paginated_collection, _details = keyset_paginator.paginate(params)
 
       expect(paginated_collection.to_sql).to eq <<~SQL.squish
@@ -55,9 +55,9 @@ RSpec.describe Jsonapi::QueryBuilder::Paginator::Keyset do
     end
   end
 
-  context "when selecting records after the position" do
-    it "filters records after the selected position" do
-      params = {column: :id, limit: 10, position: 5, direction: :after}
+  context 'when selecting records after the position' do
+    it 'filters records after the selected position' do
+      params = { column: :id, limit: 10, position: 5, direction: :after }
       paginated_collection, _details = keyset_paginator.paginate(params)
 
       expect(paginated_collection.to_sql).to eq <<~SQL.squish
@@ -70,9 +70,9 @@ RSpec.describe Jsonapi::QueryBuilder::Paginator::Keyset do
     end
   end
 
-  context "when selecting records before the position" do
-    it "filters records before the selected position" do
-      params = {column: :id, limit: 10, position: 5, direction: :before}
+  context 'when selecting records before the position' do
+    it 'filters records before the selected position' do
+      params = { column: :id, limit: 10, position: 5, direction: :before }
       paginated_collection, _details = keyset_paginator.paginate(params)
 
       expect(paginated_collection.to_sql).to eq <<~SQL.squish
