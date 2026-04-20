@@ -13,7 +13,7 @@ module Jsonapi
 
           class << self
             def deserialize_params(sort_params)
-              (sort_params || "").split(",").map(&method(:new))
+              (sort_params || '').split(',').map(&method(:new))
             end
           end
 

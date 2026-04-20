@@ -34,15 +34,15 @@ module Jsonapi
           #   # => collection.where(first_name: params.dig(:filter, :first_name)) if params[:filter]&.key?(:first_name)
           #
           # @example Change the filter condition
-          #   filters_by :first_name, if: ->(query) { query.length >= 2 }
-          #   # => collection.where(first_name: params.dig(:filter, :first_name)) if params.dig(:filter, :first_name) >= 2
-          #   filters_by :first_name, unless: ->(query) { query.length < 2 }
-          #   # => collection.where(first_name: params.dig(:filter, :first_name)) unless params.dig(:filter, :first_name) < 2
+          #   filters_by :name, if: ->(query) { query.length >= 2 }
+          #   # => collection.where(name: params.dig(:filter, :name)) if params.dig(:filter, :name) >= 2
+          #   filters_by :name, unless: ->(query) { query.length < 2 }
+          #   # => collection.where(name: params.dig(:filter, :name)) unless params.dig(:filter, :name) < 2
           #   filters_by :type, TypeFilter, if: :correct_type?
           #   # => TypeFilter.new(collection, query).yield_self { |filter| filter.results if filter.correct_type? }
           def filters_by(attribute, filter = nil, **options)
             filter ||= ->(collection, query) { collection.where(attribute => query) }
-            @supported_filters = {**supported_filters, attribute => [filter, options]}
+            @supported_filters = { **supported_filters, attribute => [filter, options] }
           end
         end
 
@@ -61,9 +61,9 @@ module Jsonapi
           self.class.supported_filters.reduce(collection) do |filtered_collection, supported_filter|
             filter, options = serialize_filter(supported_filter, collection: filtered_collection, params: filter_params)
 
-            next filtered_collection unless options[:conditions].all? { |type, condition|
+            next filtered_collection unless options[:conditions].all? do |type, condition|
               check_condition(condition, type, filter: filter, query: options[:query])
-            }
+            end
 
             filter.respond_to?(:call) ? filter.call(filtered_collection, options[:query]) : filter.results
           end
@@ -75,28 +75,29 @@ module Jsonapi
           params[:filter] || {}
         end
 
-        def serialize_filter(supported_filter, collection:, params:)
+        def serialize_filter(supported_filter, collection:, params:) # rubocop:disable Metrics/AbcSize
           attribute, (filter, options) = *supported_filter
 
           options[:query_parameter] = options[:query_parameter]&.to_sym || attribute
           options[:query] = params[options[:query_parameter]].presence
-          options[:conditions] = options.slice(:if, :unless).presence ||
-            {if: options[:query].present? || options[:allow_nil] && params.key?(options[:query_parameter])}
+          options[:conditions] =
+            options.slice(:if, :unless).presence ||
+            { if: options[:query].present? || (options[:allow_nil] && params.key?(options[:query_parameter])) }
 
           filter = filter.new(collection, options[:query]) unless filter.respond_to?(:call)
 
           [filter, options]
         end
 
-        def check_condition(condition, type, **opts)
+        def check_condition(condition, type, **opts) # rubocop:disable Naming/PredicateMethod
           (type == :if) == case condition
-          when Proc
-            condition.call(opts[:query])
-          when Symbol
-            opts[:filter].send(condition)
-          else
-            condition
-          end
+                           when Proc
+                             condition.call(opts[:query])
+                           when Symbol
+                             opts[:filter].send(condition)
+                           else
+                             condition
+                           end
         end
       end
     end

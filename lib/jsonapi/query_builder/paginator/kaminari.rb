@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "kaminari"
+require 'kaminari'
 
 module Jsonapi
   module QueryBuilder
@@ -8,9 +8,9 @@ module Jsonapi
       class Kaminari < BasePaginator
         def paginate(page_params)
           paged_collection = collection
-            .page(page_params[:number])
-            .per(page_params[:size])
-            .padding(page_params[:offset])
+                             .page(page_params[:number])
+                             .per(page_params[:size])
+                             .padding(page_params[:offset])
 
           [paged_collection, pagination_details(paged_collection, page_params)]
         end

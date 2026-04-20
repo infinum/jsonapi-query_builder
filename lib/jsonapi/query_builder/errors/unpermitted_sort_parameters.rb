@@ -7,9 +7,9 @@ module Jsonapi
         def initialize(unpermitted_parameters)
           super([
             unpermitted_parameters.to_sentence,
-            (unpermitted_parameters.count == 1) ? "is not a" : "are not",
-            "permitted sort attribute".pluralize(unpermitted_parameters.count)
-          ].join(" "))
+            unpermitted_parameters.one? ? 'is not a' : 'are not',
+            'permitted sort attribute'.pluralize(unpermitted_parameters.count)
+          ].join(' '))
         end
       end
     end

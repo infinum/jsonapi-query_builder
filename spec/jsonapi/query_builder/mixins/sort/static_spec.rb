@@ -5,42 +5,42 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort::Static do
 
   let(:collection) { instance_double("collection") }
 
-  let(:sort_param) { Jsonapi::QueryBuilder::Mixins::Sort::Param.new("-description") }
+  let(:sort_param) { Jsonapi::QueryBuilder::Mixins::Sort::Param.new('-description') }
 
   before do
     allow(collection).to receive(:order).and_return(collection)
   end
 
-  describe "#results" do
-    context "when sort is not given" do
+  describe '#results' do
+    context 'when sort is not given' do
       let(:sort) { nil }
 
-      it "defaults to ordering collection by attribute name" do
+      it 'defaults to ordering collection by attribute name' do
         static_sort.results(collection, sort_param)
 
         expect(collection).to have_received(:order).with(description: :desc)
       end
     end
 
-    context "when sort is a Proc" do
+    context 'when sort is a Proc' do
       let(:sort) { ->(collection, direction) { collection.order(foobar: direction) } }
 
-      it "calls the provided proc" do
+      it 'calls the provided proc' do
         static_sort.results(collection, sort_param)
 
         expect(collection).to have_received(:order).with(foobar: :desc)
       end
     end
 
-    context "when sort is a class" do
       let(:sort_class_instance) { instance_double("SortClass", results: collection) }
+    context 'when sort is a class' do
       let(:sort) { SortClass }
 
       before do
         class_double("SortClass", new: sort_class_instance).as_stubbed_const
       end
 
-      it "uses the provided sort class", :aggregate_failures do
+      it 'uses the provided sort class', :aggregate_failures do
         static_sort.results(collection, sort_param)
 
         expect(SortClass).to have_received(:new).with(collection, :desc)

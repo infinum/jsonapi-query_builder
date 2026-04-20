@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-require "jsonapi/query_builder/paginator/pagy_countless"
+require 'jsonapi/query_builder/paginator/pagy_countless'
 
 RSpec.describe Jsonapi::QueryBuilder::Paginator::PagyCountless do
-  describe "#paginate" do
+  describe '#paginate' do
     subject(:paginate) { pagy_paginator.paginate(number: 2, size: 20, offset: 3) }
 
     let(:pagy_paginator) { described_class.new(collection) }
@@ -17,20 +17,20 @@ RSpec.describe Jsonapi::QueryBuilder::Paginator::PagyCountless do
 
     it { is_expected.to be_an Array }
 
-    it "returns the records and pagination details" do
+    it 'returns the records and pagination details' do
       expect(paginate).to eql [paged_collection, pagination_details]
     end
 
-    it "passes the collection and pagination params to pagy_countless method" do
+    it 'passes the collection and pagination params to pagy_countless method' do
       paginate
 
       expect(pagy_paginator).to have_received(:pagy_countless).with(collection, page: 2, items: 20, outset: 3)
     end
 
-    it "sets the private params attribute reader used internally by pagy backend" do
+    it 'sets the private params attribute reader used internally by pagy backend' do
       paginate
 
-      expect(pagy_paginator.send(:params)).to eql page: {number: 2, size: 20, offset: 3}
+      expect(pagy_paginator.send(:params)).to eql page: { number: 2, size: 20, offset: 3 }
     end
   end
 end
