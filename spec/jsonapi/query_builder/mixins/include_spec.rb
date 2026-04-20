@@ -20,7 +20,7 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Include do
   describe '#includes' do
     subject(:add_includes) { AuthorQuery.new(include_params).add_includes(collection) }
 
-    let(:collection) { instance_double "collection" }
+    let(:collection) { instance_double ActiveRecord::Relation }
     let(:include_params) { {} }
 
     before do

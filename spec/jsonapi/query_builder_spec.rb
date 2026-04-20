@@ -37,7 +37,7 @@ RSpec.describe Jsonapi::QueryBuilder do
       end
     end
 
-    let(:collection) { instance_double "collection" }
+    let(:collection) { instance_double ActiveRecord::Relation }
 
     let(:params) do
       {
@@ -49,15 +49,11 @@ RSpec.describe Jsonapi::QueryBuilder do
     end
 
     before do
-      stub_const "TypeFilter", type_filter_class
-      stub_const "Query", query_class
+      stub_const 'TypeFilter', type_filter_class
+      stub_const 'Query', query_class
 
-      allow(collection).to receive(:order).and_return(collection)
-      allow(collection).to receive(:includes).and_return(collection)
-      allow(collection).to receive(:where).and_return(collection)
-      allow(collection).to receive(:count).and_return(2)
-      allow(collection).to receive(:offset).and_return(collection)
-      allow(collection).to receive(:limit).and_return(collection)
+      allow(collection).to receive_messages(order: collection, includes: collection, where: collection, count: 2,
+                                            offset: collection, limit: collection)
     end
 
     it { is_expected.to have_attributes(results: collection, pagination_details: an_instance_of(Pagy)) }
@@ -105,7 +101,7 @@ RSpec.describe Jsonapi::QueryBuilder do
     describe '#find' do
       subject(:find) { query.find(1) }
 
-      let(:record) { instance_double "record" }
+      let(:record) { instance_double Object }
 
       before do
         allow(collection).to receive(:find_by!).and_return(record)

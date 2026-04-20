@@ -122,18 +122,22 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort do
           @collection = collection
           @params = params
         end
-    let(:street_sort_class) { class_double "StreetSort", new: street_sort_instance }
-    let(:street_sort_instance) { instance_double "street_sort", results: collection }
-    let(:dynamic_sort_class) { class_double "DynamicSort", new: dynamic_sort_instance }
-    let(:dynamic_sort_instance) { instance_double "dynamic_sort", results: collection }
-    let(:collection) { instance_double "collection" }
-    let(:params) { {sort: "first_name,-last_name,address.street,data.foobar"} }
+      end
+    end
+    let(:street_sort_class) { Class.new(Jsonapi::QueryBuilder::Mixins::Sort::Static) }
+    let(:street_sort_instance) { instance_double StreetSort, results: collection }
+    let(:dynamic_sort_class) { Class.new(Jsonapi::QueryBuilder::Mixins::Sort::Dynamic) }
+    let(:dynamic_sort_instance) { instance_double DynamicSort, results: collection }
+    let(:collection) { instance_double ActiveRecord::Relation }
+    let(:params) { { sort: 'first_name,-last_name,address.street,data.foobar' } }
 
     before do
-      stub_const "StreetSort", street_sort_class
-      stub_const "DynamicSort", dynamic_sort_class
-      stub_const "SortableQuery", sortable_query_class
+      stub_const 'StreetSort', street_sort_class
+      stub_const 'DynamicSort', dynamic_sort_class
+      stub_const 'SortableQuery', sortable_query_class
 
+      allow(StreetSort).to receive(:new).and_return(street_sort_instance)
+      allow(DynamicSort).to receive(:new).and_return(dynamic_sort_instance)
       allow(collection).to receive(:order).and_return(collection)
     end
 
