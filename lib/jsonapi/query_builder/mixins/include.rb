@@ -23,17 +23,17 @@ module Jsonapi
           return [] unless include_params
 
           include_params
-            .split(",")
+            .split(',')
             .map(&:strip)
             .map(&method(:formatted_includes_relationship))
         end
 
         def formatted_includes_relationship(relationship)
-          parent, children = relationship.split(".", 2)
+          parent, children = relationship.split('.', 2)
 
           return parent.to_sym unless children
 
-          {parent.to_sym => formatted_includes_relationship(children)}
+          { parent.to_sym => formatted_includes_relationship(children) }
         end
       end
     end

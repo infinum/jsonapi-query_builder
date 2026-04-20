@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "jsonapi/query_builder/base_sort"
+require 'jsonapi/query_builder/base_sort'
 
 module Jsonapi
   module QueryBuilder
