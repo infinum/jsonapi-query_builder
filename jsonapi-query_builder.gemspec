@@ -40,17 +40,4 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "activerecord", ">= 7.2"
   spec.add_runtime_dependency "pagy", ">= 3.5"
-
-  spec.add_development_dependency "bundler", "~> 2.0"
-  spec.add_development_dependency "bundler-audit"
-  spec.add_development_dependency "rake", "~> 13.0"
-  spec.add_development_dependency "rspec", "~> 3.0"
-  spec.add_development_dependency "standardrb"
-  spec.add_development_dependency "standard"
-  spec.add_development_dependency "rubocop-rspec"
-  spec.add_development_dependency "lefthook"
-  spec.add_development_dependency "kaminari", "~> 1.2"
-  spec.add_development_dependency "activerecord"
-  spec.add_development_dependency "sqlite3"
-  spec.add_development_dependency "pry"
 end
