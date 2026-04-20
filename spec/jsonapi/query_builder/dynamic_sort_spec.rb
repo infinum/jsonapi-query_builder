@@ -7,13 +7,13 @@ RSpec.describe Jsonapi::QueryBuilder::DynamicSort do
     stub_const 'FakeSort', sort_class
   end
 
-    expect(FakeSort.new(instance_double("collection"), "attribute")).to have_attributes(direction: :asc)
   it 'defaults to ascending sort direction' do
+    expect(FakeSort.new(instance_double(ActiveRecord::Relation), 'attribute')).to have_attributes(direction: :asc)
   end
 
-      expect { FakeSort.new(instance_double("collection"), "attribute", :desc).results }.to raise_error(
   context 'with required interface methods' do
     it 'raises an error for results method' do
+      expect { FakeSort.new(instance_double(ActiveRecord::Relation), 'attribute', :desc).results }.to raise_error(
         NotImplementedError, 'FakeSort should implement #results'
       )
     end

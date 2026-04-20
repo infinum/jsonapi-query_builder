@@ -67,16 +67,20 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Filter do
         end
       end
     end
+    let(:type_filter_class) do
+      Class.new(Jsonapi::QueryBuilder::BaseFilter) do
+        def correct_type? = true
+      end
     end
-    let(:type_filter_class) { class_double "TypeFilter", new: type_filter_instance }
-    let(:type_filter_instance) { instance_double "type_filter", results: collection }
-    let(:collection) { instance_double "collection" }
-    let(:params) { {filter: {first_name: "John", email: "john", type: "user"}} }
+    let(:type_filter_instance) { instance_double(TypeFilter, results: collection) }
+    let(:collection) { instance_double ActiveRecord::Relation }
+    let(:params) { { filter: { first_name: 'John', email: 'john', type: 'user' } } }
 
     before do
-      stub_const "TypeFilter", type_filter_class
-      stub_const "FilterableQuery", filterable_query_class
+      stub_const 'TypeFilter', type_filter_class
+      stub_const 'FilterableQuery', filterable_query_class
 
+      allow(TypeFilter).to receive(:new).and_return(type_filter_instance)
       allow(collection).to receive(:where).and_return(collection)
     end
 

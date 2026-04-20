@@ -34,12 +34,15 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Sort::Dynamic do
       end
     end
 
-      let(:sort_class_instance) { instance_double("SortClass", results: collection) }
     context 'when sort is a class' do
+      let(:sort_class) { Class.new(described_class) }
+      let(:sort_class_instance) { instance_double(SortClass, results: collection) }
       let(:sort) { SortClass }
 
       before do
-        class_double("SortClass", new: sort_class_instance).as_stubbed_const
+        stub_const('SortClass', sort_class)
+
+        allow(SortClass).to receive(:new).and_return(sort_class_instance)
       end
 
       it 'uses the provided sort class', :aggregate_failures do

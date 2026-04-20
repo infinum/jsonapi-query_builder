@@ -43,10 +43,10 @@ RSpec.describe Jsonapi::QueryBuilder::Mixins::Paginate do
         end
       end
     end
-    let(:collection) { instance_double "collection" }
-    let(:paged_query) { PagedQuery.new page: {number: 2, size: 20, offset: 0} }
-    let(:paged_collection) { instance_double "paged-collection" }
-    let(:pagination_details) { instance_double "pagination-details" }
+    let(:collection) { instance_double ActiveRecord::Relation }
+    let(:paged_query) { PagedQuery.new page: { number: 2, size: 20, offset: 0 } }
+    let(:paged_collection) { instance_double Object }
+    let(:pagination_details) { instance_double Object }
     let(:paginator) do
       instance_double Jsonapi::QueryBuilder::Paginator::Pagy, paginate: [paged_collection, pagination_details]
     end

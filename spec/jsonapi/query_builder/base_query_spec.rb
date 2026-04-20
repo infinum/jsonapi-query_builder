@@ -2,7 +2,7 @@
 
 RSpec.describe Jsonapi::QueryBuilder::BaseQuery do
   let(:query) { described_class.new(collection, params) }
-  let(:collection) { instance_double "collection" }
+  let(:collection) { instance_double ActiveRecord::Relation }
 
   before do
     allow(query).to receive(:add_includes).and_return(collection)
@@ -11,9 +11,8 @@ RSpec.describe Jsonapi::QueryBuilder::BaseQuery do
   describe '#results' do
     subject(:results) { query.results }
 
-    let(:filtered_collection) { instance_double "filtered_collection" }
-    let(:paged_filtered_collection) { instance_double "paged_filtered_collection" }
-    let(:params) {
+    let(:filtered_collection) { instance_double ActiveRecord::Relation }
+    let(:paged_filtered_collection) { instance_double ActiveRecord::Relation }
     let(:params) do
       {
         sort: 'last_name,first_name',
@@ -24,9 +23,8 @@ RSpec.describe Jsonapi::QueryBuilder::BaseQuery do
     end
 
     before do
-      allow(query).to receive(:sort).and_return(collection)
-      allow(query).to receive(:filter).and_return(filtered_collection)
-      allow(query).to receive(:paginate).and_return(paged_filtered_collection)
+      allow(query).to receive_messages(sort: collection, filter: filtered_collection,
+                                       paginate: paged_filtered_collection)
     end
 
     it 'returns the collection' do

@@ -5,9 +5,9 @@ RSpec.describe Jsonapi::QueryBuilder::Paginator::Pagy do
     subject(:paginate) { pagy_paginator.paginate(number: 2, size: 20, offset: 3) }
 
     let(:pagy_paginator) { described_class.new(collection) }
-    let(:collection) { instance_double "collection" }
-    let(:paged_collection) { instance_double "paged-collection" }
-    let(:pagination_details) { instance_double Pagy, "pagination-details" }
+    let(:collection) { instance_double ActiveRecord::Relation }
+    let(:paged_collection) { instance_double Object }
+    let(:pagination_details) { instance_double Pagy, 'pagination-details' }
 
     before do
       allow(pagy_paginator).to receive(:pagy).and_return([pagination_details, paged_collection])
